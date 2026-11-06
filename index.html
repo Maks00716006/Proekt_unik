@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Соседи — вход</title>
+  <meta name="description" content="Сервис обмена вещами и услугами между студентами общежития">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+  <main class="auth">
+    <!-- Левая часть: анимированная витрина -->
+    <section class="showcase" aria-hidden="true">
+      <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+      <div class="grid-dots"></div>
+
+      <div class="brand">
+        <img src="assets/logo.svg" alt="">
+        <div><b>Соседи</b><small>обмен в общежитии</small></div>
+      </div>
+
+      <div class="hero">
+        <h1>Не покупай —<br>возьми у соседа <span class="rotator"><span id="rotWord">дрель</span><i class="caret"></i></span></h1>
+        <p>Вещи на время, полезные услуги и напоминания о возврате — всё общежитие в одном месте.</p>
+
+        <div class="stats">
+          <div><b data-count="128">0</b><span>вещей в обмене</span></div>
+          <div><b data-count="342">0</b><span>студентов</span></div>
+          <div><b data-count="86400" data-suffix=" ₽">0</b><span>сэкономлено</span></div>
+        </div>
+      </div>
+
+      <div class="floaters">
+        <div class="chip c1"><span>🔧</span><div><b>Дрель</b><small>корп. 2 · свободна</small></div><em class="ok">✓</em></div>
+        <div class="chip c2"><span>🪜</span><div><b>Стремянка</b><small>корп. 1 · 207</small></div></div>
+        <div class="chip c3"><span>💻</span><div><b>Починю ноутбук</b><small>★ 4.9 · 23 отзыва</small></div></div>
+        <div class="chip c4"><span>⏰</span><div><b>Верни утюг завтра</b><small>напоминание</small></div></div>
+        <div class="chip c5"><span>🎓</span><div><b>Помогу с матаном</b><small>корп. 1 · 410</small></div></div>
+      </div>
+    </section>
+
+    <!-- Правая часть: форма -->
+    <section class="panel">
+      <div class="card" id="card">
+        <div class="card-glow" id="glow"></div>
+
+        <div class="mobile-brand">
+          <img src="assets/favicon.svg" alt=""> <b>Соседи</b>
+        </div>
+
+        <h2 id="title">С возвращением 👋</h2>
+        <p class="sub" id="subtitle">Войди, чтобы найти нужное у соседей</p>
+
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-tab="login" role="tab">Вход</button>
+          <button class="tab" data-tab="register" role="tab">Регистрация</button>
+          <span class="tab-ind" id="tabInd"></span>
+        </div>
+
+        <!-- Вход -->
+        <form id="loginForm" class="form" novalidate>
+          <label class="field">
+            <input type="email" name="email" placeholder=" " autocomplete="email" required>
+            <span>Email</span>
+            <i class="ico">✉️</i>
+          </label>
+          <label class="field">
+            <input type="password" name="pass" placeholder=" " autocomplete="current-password" required>
+            <span>Пароль</span>
+            <i class="ico">🔒</i>
+            <button type="button" class="eye" aria-label="Показать пароль">👁</button>
+          </label>
+          <div class="row">
+            <label class="check"><input type="checkbox" name="remember" checked><i></i> Запомнить меня</label>
+            <a href="#" class="link" id="forgot">Забыли пароль?</a>
+          </div>
+          <p class="err" id="loginErr"></p>
+          <button class="btn primary" type="submit"><span class="lbl">Войти</span><span class="spin"></span><span class="tick">✓</span></button>
+          <div class="divider"><span>или</span></div>
+          <button class="btn ghost" type="button" id="demoBtn">⚡ Войти в демо-аккаунт</button>
+        </form>
+
+        <!-- Регистрация -->
+        <form id="regForm" class="form hidden" novalidate>
+          <label class="field">
+            <input type="text" name="fullname" placeholder=" " autocomplete="name" required>
+            <span>Имя и фамилия</span>
+            <i class="ico">🙂</i>
+          </label>
+          <label class="field">
+            <input type="email" name="email" placeholder=" " autocomplete="email" required>
+            <span>Email</span>
+            <i class="ico">✉️</i>
+          </label>
+          <div class="two">
+            <label class="field">
+              <select name="bld" required>
+                <option value="1">Корпус 1</option><option value="2">Корпус 2</option>
+                <option value="3">Корпус 3</option><option value="4">Корпус 4</option>
+              </select>
+              <i class="ico">🏢</i>
+            </label>
+            <label class="field">
+              <input type="text" name="room" placeholder=" " inputmode="numeric" required>
+              <span>Комната</span>
+              <i class="ico">🚪</i>
+            </label>
+          </div>
+          <label class="field">
+            <input type="password" name="pass" placeholder=" " autocomplete="new-password" required minlength="6">
+            <span>Пароль (от 6 символов)</span>
+            <i class="ico">🔒</i>
+            <button type="button" class="eye" aria-label="Показать пароль">👁</button>
+          </label>
+          <div class="strength"><i></i><i></i><i></i><i></i><small id="strengthTxt"></small></div>
+          <p class="err" id="regErr"></p>
+          <button class="btn primary" type="submit"><span class="lbl">Создать аккаунт</span><span class="spin"></span><span class="tick">✓</span></button>
+        </form>
+
+        <p class="foot">Учебный проект · сервис обмена вещами и услугами в общежитии</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="reveal" id="reveal"></div>
+  <div class="toast" id="toast"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
