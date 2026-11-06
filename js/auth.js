@@ -8,35 +8,6 @@
 
   requestAnimationFrame(() => document.body.classList.add('loaded'));
 
-  /* --- вращающееся слово в заголовке --- */
-  const words = ['дрель', 'стремянку', 'утюг', 'палатку', 'помощь с матаном', 'калькулятор'];
-  const rot = $('#rotWord');
-  let wi = 0, ci = words[0].length, deleting = true;
-  function typeLoop() {
-    const w = words[wi];
-    if (deleting) {
-      ci--; rot.textContent = w.slice(0, ci);
-      if (ci === 0) { deleting = false; wi = (wi + 1) % words.length; }
-      setTimeout(typeLoop, 55);
-    } else {
-      const nw = words[wi]; ci++; rot.textContent = nw.slice(0, ci);
-      if (ci === nw.length) { deleting = true; setTimeout(typeLoop, 1800); }
-      else setTimeout(typeLoop, 85);
-    }
-  }
-  setTimeout(typeLoop, 1800);
-
-  /* --- счётчики --- */
-  $$('[data-count]').forEach(el => {
-    const target = +el.dataset.count, suf = el.dataset.suffix || '';
-    const t0 = performance.now(), dur = 1600;
-    (function tick(t) {
-      const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
-      el.textContent = Math.round(target * e).toLocaleString('ru-RU') + suf;
-      if (p < 1) requestAnimationFrame(tick);
-    })(t0);
-  });
-
   /* --- подсветка карточки за курсором --- */
   const card = $('#card'), glow = $('#glow');
   card.addEventListener('mousemove', e => {
@@ -53,10 +24,6 @@
     tabs.classList.toggle('reg', name === 'register');
     $('#loginForm').classList.toggle('hidden', name !== 'login');
     $('#regForm').classList.toggle('hidden', name !== 'register');
-    $('#title').textContent = name === 'login' ? 'С возвращением 👋' : 'Добро пожаловать ✨';
-    $('#subtitle').textContent = name === 'login'
-      ? 'Войди, чтобы найти нужное у соседей'
-      : 'Создай аккаунт за 30 секунд';
   }
 
   /* --- показать пароль --- */
