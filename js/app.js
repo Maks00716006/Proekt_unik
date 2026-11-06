@@ -303,7 +303,9 @@ function pageCatalog() {
         </div>
         <div class="grid">${g.list.map((it, i) => cardHtml(it, { i })).join('')}</div>
       </section>`).join('')
-    : `<div class="group"><div class="empty"><div class="big">🔍</div>Ничего не нашлось. Попробуй изменить фильтры<br>или <a href="#" id="emptyNew">выложи своё объявление</a>.</div></div>`}
+    : items.length === 0
+      ? `<div class="group"><div class="empty"><div class="big">📭</div><b style="font-size:17px;color:var(--text)">${t('emptyTitle')}</b><br>${t('emptyText')}<br><br><button class="btn primary" id="emptyNewBtn">${t('post')}</button></div></div>`
+      : `<div class="group"><div class="empty"><div class="big">🔍</div>${t('noMatch')}<br><a href="#" id="emptyNew">${t('postOwn')}</a></div></div>`}
     <p class="meta" style="margin-top:8px">${t('nowFree')}: ${freeCount} / ${list.length}</p>
   </div>`;
 
@@ -322,6 +324,7 @@ function pageCatalog() {
   $('#fReset').addEventListener('click', () => { Object.assign(F, { cat: '', bld: '', status: '', q: '', sort: 'new' }); pageCatalog(); });
   $('#newBtn').addEventListener('click', () => openNew(F.type === 'service' ? 'service' : 'thing'));
   $('#emptyNew')?.addEventListener('click', e => { e.preventDefault(); openNew('thing'); });
+  $('#emptyNewBtn')?.addEventListener('click', () => openNew(F.type === 'service' ? 'service' : 'thing'));
   $$('.group-h').forEach(h => h.addEventListener('click', () => {
     const g = h.parentElement, name = g.dataset.g;
     g.classList.toggle('closed');

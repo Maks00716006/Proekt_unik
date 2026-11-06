@@ -35,7 +35,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 #appScreen .topbar { background: var(--blue); color: #fff; position: sticky; top: 0; z-index: 20; }
 #appScreen .topbar-in { display: flex; align-items: center; gap: 28px; height: 56px; padding: 0 24px; }
 #appScreen .logo { display: flex; align-items: center; gap: 8px; color: #fff; }
-#appScreen .logo img { width: 34px; height: 34px; }
+#appScreen .logo-badge { width: 36px; height: 36px; border-radius: 50%; background: #fff; display: grid; place-items: center; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+#appScreen .logo img { width: 28px; height: 28px; }
 #appScreen .logo b { display: block; font-size: 13px; font-weight: 800; letter-spacing: .3px; line-height: 1.1; }
 #appScreen .logo small { display: block; font-size: 7.5px; letter-spacing: .6px; opacity: .85; }
 #appScreen .nav { display: flex; gap: 4px; }

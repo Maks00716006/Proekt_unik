@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="ga" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#36e2fa"/><stop offset="1" stop-color="#1e5fee"/>
+    </linearGradient>
+    <linearGradient id="gb" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1640e6"/><stop offset="1" stop-color="#2c8ff5"/>
+    </linearGradient>
+    <linearGradient id="gc" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3ae4fa"/><stop offset=".55" stop-color="#2178f2"/><stop offset="1" stop-color="#1b4ce8"/>
+    </linearGradient>
+    <linearGradient id="gd" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a47e8"/><stop offset="1" stop-color="#40e8fb"/>
+    </linearGradient>
+  </defs>
+  <!-- большая левая дуга -->
+  <path d="M50 2 A48 48 0 0 0 50 98 L50 85 A35 35 0 0 1 50 15 Z" fill="url(#ga)"/>
+  <!-- правая дуга -->
+  <path d="M51 14 A36 36 0 0 1 51 86 L51 74 A24 24 0 0 0 51 26 Z" fill="url(#gb)"/>
+  <!-- среднее кольцо -->
+  <path fill="url(#gc)" d="M74 50 A24 24 0 1 0 50 74 L50 61 A11 11 0 1 1 61 50 Z"/>
+  <!-- шар в центре -->
+  <circle cx="50" cy="50" r="11" fill="url(#gd)"/>
+</svg>

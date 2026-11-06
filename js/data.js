@@ -6,16 +6,16 @@
 const MEM = {};
 const DB = {
   get(key, def) {
-    try { const v = localStorage.getItem('sosedi2_' + key); if (v !== null) return JSON.parse(v); } catch (e) {}
+    try { const v = localStorage.getItem('sosedi3_' + key); if (v !== null) return JSON.parse(v); } catch (e) {}
     return key in MEM ? JSON.parse(MEM[key]) : def;
   },
   set(key, val) {
     MEM[key] = JSON.stringify(val);
-    try { localStorage.setItem('sosedi2_' + key, MEM[key]); } catch (e) {}
+    try { localStorage.setItem('sosedi3_' + key, MEM[key]); } catch (e) {}
   },
   del(key) {
     delete MEM[key];
-    try { localStorage.removeItem('sosedi2_' + key); } catch (e) {}
+    try { localStorage.removeItem('sosedi3_' + key); } catch (e) {}
   }
 };
 
@@ -143,7 +143,7 @@ function getUsers() {
 function saveUsers(u) { DB.set('users', u); }
 function currentUser() {
   let email = DB.get('session', null);
-  if (!email) { try { email = JSON.parse(sessionStorage.getItem('sosedi2_session')); } catch (e) {} }
+  if (!email) { try { email = JSON.parse(sessionStorage.getItem('sosedi3_session')); } catch (e) {} }
   if (!email) email = MEM.tabSession || null;
   if (!email) return null;
   return getUsers().find(u => u.email === email) || null;
@@ -151,12 +151,12 @@ function currentUser() {
 function login(email, remember) {
   MEM.tabSession = email;
   if (remember) DB.set('session', email);
-  else { DB.del('session'); try { sessionStorage.setItem('sosedi2_session', JSON.stringify(email)); } catch (e) {} }
+  else { DB.del('session'); try { sessionStorage.setItem('sosedi3_session', JSON.stringify(email)); } catch (e) {} }
 }
 function logout() {
   delete MEM.tabSession;
   DB.del('session');
-  try { sessionStorage.removeItem('sosedi2_session'); } catch (e) {}
+  try { sessionStorage.removeItem('sosedi3_session'); } catch (e) {}
 }
 
 /* ===== объявления ===== */
@@ -228,10 +228,13 @@ function seedItems() {
   ];
 }
 
+/* примеры объявлений выключены — каталог пустой, пока студенты не выложат свои */
+const SEED_DEMO_LISTINGS = false;
+
 function getItems() {
   const items = DB.get('items', null);
   if (items) return items;
-  const seeded = seedItems();
+  const seeded = SEED_DEMO_LISTINGS ? seedItems() : [];
   DB.set('items', seeded);
   return seeded;
 }

@@ -33,7 +33,9 @@ const I18N = {
     available: 'Свободна', taken: 'Занята', canTake: 'можно взять', until: 'до', overdue: 'просрочено',
     myAds: 'Мои объявления', myLoans: 'Мои займы', aboutTitle: 'Обмен вещами и услугами между студентами общежития',
     changeDorm: 'Сменить общежитие', save: 'Сохранить', dormSaved: 'Общежитие сохранено',
-    hello: 'Привет', welcome: 'Рады видеть тебя в «Соседях»'
+    hello: 'Привет', welcome: 'Рады видеть тебя в «Соседях»',
+    emptyTitle: 'Пока объявлений нет', emptyText: 'Выложи вещь или предложи услугу — соседи увидят её первыми.',
+    noMatch: 'Ничего не нашлось. Попробуй изменить фильтры', postOwn: 'или выложи своё объявление'
   },
   en: {
     langName: 'English (en)',
@@ -66,7 +68,9 @@ const I18N = {
     available: 'Available', taken: 'Taken', canTake: 'can borrow', until: 'until', overdue: 'overdue',
     myAds: 'My listings', myLoans: 'My loans', aboutTitle: 'Sharing items and services between dorm students',
     changeDorm: 'Change dormitory', save: 'Save', dormSaved: 'Dormitory saved',
-    hello: 'Hi', welcome: 'Welcome to Sosedi'
+    hello: 'Hi', welcome: 'Welcome to Sosedi',
+    emptyTitle: 'No listings yet', emptyText: 'Post an item or offer a service — your neighbours will see it first.',
+    noMatch: 'Nothing found. Try changing the filters', postOwn: 'or post your own listing'
   }
 };
 
