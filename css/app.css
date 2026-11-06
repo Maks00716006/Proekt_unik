@@ -389,3 +389,14 @@ body, #appScreen .card, #appScreen .group, #appScreen .ctl, #appScreen .btn, #ap
   #appScreen .logo b { font-size: 11px; letter-spacing: 0; }
 }
 @media (max-width: 600px) { #appScreen .ctl, #appScreen textarea.ctl { font-size: 16px; } }
+
+/* меню профиля: выбор языка */
+#appScreen .dropdown .um-lang { display: flex; align-items: center; gap: 8px; }
+#appScreen .um-lang small { margin-left: auto; color: var(--muted); font-size: 13px; }
+#appScreen .um-lang svg { color: var(--muted); transition: transform .2s; }
+#appScreen .um-lang.open svg { transform: rotate(180deg); }
+#appScreen .um-langs { margin: 0 0 4px 12px; padding-left: 8px; border-left: 2px solid var(--line); }
+#appScreen .dropdown .um-langs button { padding: 7px 10px; font-size: 13.5px; display: flex; justify-content: space-between; }
+#appScreen .dropdown .um-langs button.on { color: var(--blue); font-weight: 600; }
+#appScreen .dropdown .um-langs button.on::after { content: '✓'; }
+:root[data-theme="dark"] #appScreen .dropdown .um-langs button.on { color: var(--link); }

@@ -18,7 +18,7 @@ const I18N = {
 
     navCatalog: 'Каталог', navMy: 'Мои объявления', navLoans: 'Мои обмены', navAbout: 'О сервисе', navProfile: 'Профиль', umProfile: 'Профиль',
     umMy: 'Мои объявления', umLoans: 'Мои обмены', umDorm: 'Сменить общежитие',
-    umLang: 'English', umReset: 'Очистить объявления', umLogout: 'Выйти',
+    umLang: 'Язык', umReset: 'Очистить объявления', umLogout: 'Выйти',
     fAbout: 'О сервисе', fHow: 'Как это работает', fRules: 'Правила обмена', fSupport: 'Поддержка',
     fDorms: 'Общежития', fSections: 'Разделы',
     fBottom: 'МИСИС Соседи · сервис обмена вещами и услугами между студентами общежитий · 2026',
@@ -53,7 +53,7 @@ const I18N = {
 
     navCatalog: 'Catalogue', navMy: 'My listings', navLoans: 'My exchanges', navAbout: 'About', navProfile: 'Profile', umProfile: 'Profile',
     umMy: 'My listings', umLoans: 'My exchanges', umDorm: 'Change dormitory',
-    umLang: 'Русский', umReset: 'Clear listings', umLogout: 'Log out',
+    umLang: 'Language', umReset: 'Clear listings', umLogout: 'Log out',
     fAbout: 'About', fHow: 'How it works', fRules: 'Sharing rules', fSupport: 'Support',
     fDorms: 'Dormitories', fSections: 'Sections',
     fBottom: 'MISIS Sosedi · sharing items and services between dorm students · 2026',

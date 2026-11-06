@@ -97,8 +97,13 @@
             <a href="#profile" data-i18n="umProfile">Профиль</a>
             <a href="#my" data-i18n="umMy">Мои объявления</a>
             <a href="#loans" data-i18n="umLoans">Мои обмены</a>
-            <button id="langToggle" data-i18n="umLang">English</button>
             <button id="resetBtn" data-i18n="umReset">Очистить объявления</button>
+            <button id="langToggle" class="um-lang"><span data-i18n="umLang">Язык</span><small id="umLangCur">Русский</small>
+              <svg width="10" height="10" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none"/></svg></button>
+            <div class="um-langs" id="umLangs" hidden>
+              <button data-lang="ru">Русский</button>
+              <button data-lang="en">English</button>
+            </div>
             <button id="logoutBtn" class="danger" data-i18n="umLogout">Выйти</button>
           </div>
         </div>

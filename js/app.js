@@ -70,10 +70,23 @@ function openDormPicker() {
 }
 
 /* язык */
+function markLang() {
+  $('#umLangCur').textContent = LANG === 'en' ? 'English' : 'Русский';
+  $$('#umLangs button').forEach(b => b.classList.toggle('on', b.dataset.lang === LANG));
+}
+markLang();
 $('#langToggle').addEventListener('click', () => {
-  setLang(LANG === 'ru' ? 'en' : 'ru');
-  $$('.dropdown').forEach(d => d.hidden = true);
+  const list = $('#umLangs');
+  list.hidden = !list.hidden;
+  $('#langToggle').classList.toggle('open', !list.hidden);
 });
+$$('#umLangs button').forEach(b => b.addEventListener('click', () => {
+  $$('.dropdown').forEach(d => d.hidden = true);
+  $('#umLangs').hidden = true; $('#langToggle').classList.remove('open');
+  if (b.dataset.lang !== LANG) setLang(b.dataset.lang);
+  markLang();
+}));
+$('#userBtn').addEventListener('click', () => { $('#umLangs').hidden = true; $('#langToggle').classList.remove('open'); });
 document.addEventListener('langchange', () => {
   $('#umRoom').textContent = where();
   route();
@@ -217,7 +230,7 @@ function pageCatalog() {
 
   $('#view').innerHTML = `
   <div class="page">
-    <h1>${t('catalog')}</h1>${ME.bld ? `<p class="meta" style="margin:-6px 0 14px">🏠 ${t('myDorm')}: <b>${esc(dormName(ME.bld))}</b></p>` : ''}
+    <h1>${t('catalog')}</h1>${ME.bld ? `<p class="meta" style="margin:-6px 0 14px">${t('myDorm')}: <b>${esc(dormName(ME.bld))}</b></p>` : ''}
     <div class="toprow">
       <div class="seg">
         <button data-type="thing" class="${F.type === 'thing' ? 'on' : ''}">${t('things')}</button>
@@ -226,7 +239,7 @@ function pageCatalog() {
       </div>
       <div class="right-tools">
         <span class="pill">${t('ads')}: ${list.length}</span>
-        <button class="btn f-toggle" id="fToggle">⚙ ${LANG === 'en' ? 'Filters' : 'Фильтры'}${F.cat || F.status || F.sort !== 'new' ? ' •' : ''}</button>
+        <button class="btn f-toggle" id="fToggle">${LANG === 'en' ? 'Filters' : 'Фильтры'}${F.cat || F.status || F.sort !== 'new' ? ' •' : ''}</button>
         <button class="btn" id="newBtn">${t('post')}</button>
       </div>
     </div>
@@ -735,7 +748,7 @@ function pageProfile() {
       <span class="avatar big">${initials(ME.name)}</span>
       <div style="flex:1">
         <h1 style="margin:0;color:#fff">${esc(ME.name)}</h1>
-        <p>🏠 ${esc(dormName(ME.bld))}${ME.room ? ' · комн. ' + esc(ME.room) : ''}</p>
+        <p>${esc(dormName(ME.bld))}${ME.room ? ' · комн. ' + esc(ME.room) : ''}</p>
         <p class="hero-stars">${stars} <small>${st.rating ? st.rating.avg.toFixed(1) + ' · ' + st.rating.n + ' ' + plural(st.rating.n, 'оценка', 'оценки', 'оценок') : 'оценок пока нет'}</small></p>
       </div>
       <button class="btn hero-btn" id="editProfile">✎ Редактировать</button>
