@@ -1,12 +1,11 @@
 /* ===== Страница входа ===== */
-(function () {
-  if (currentUser()) { location.replace('app.html'); return; }
+function startAuth() {
   getUsers(); // создаёт демо-аккаунт при первом запуске
 
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
-  requestAnimationFrame(() => document.body.classList.add('loaded'));
+  requestAnimationFrame(() => requestAnimationFrame(() => $('.auth-root').classList.add('loaded')));
 
   /* --- подсветка карточки за курсором --- */
   const card = $('#card'), glow = $('#glow');
@@ -84,7 +83,7 @@
         rv.style.left = (r.left + r.width / 2) + 'px';
         rv.style.top = (r.top + r.height / 2) + 'px';
         rv.classList.add('go');
-        setTimeout(() => location.href = 'app.html', 650);
+        setTimeout(() => showApp(), 650);
       }, 450);
     }, 900);
   }
@@ -138,4 +137,4 @@
     saveUsers(users);
     success(f.querySelector('.btn.primary'), email, true);
   });
-})();
+}

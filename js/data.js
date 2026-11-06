@@ -1,15 +1,22 @@
 /* ===== Общие данные и утилиты сервиса «Соседи» =====
    Демо-версия: всё хранится в localStorage браузера. */
 
+/* Если браузер запрещает localStorage (встроенный просмотр, приватный режим),
+   данные живут в памяти страницы — сайт всё равно работает. */
+const MEM = {};
 const DB = {
   get(key, def) {
-    try { const v = localStorage.getItem('sosedi_' + key); return v ? JSON.parse(v) : def; }
-    catch (e) { return def; }
+    try { const v = localStorage.getItem('sosedi_' + key); if (v !== null) return JSON.parse(v); } catch (e) {}
+    return key in MEM ? JSON.parse(MEM[key]) : def;
   },
   set(key, val) {
-    try { localStorage.setItem('sosedi_' + key, JSON.stringify(val)); } catch (e) {}
+    MEM[key] = JSON.stringify(val);
+    try { localStorage.setItem('sosedi_' + key, MEM[key]); } catch (e) {}
   },
-  del(key) { try { localStorage.removeItem('sosedi_' + key); } catch (e) {} }
+  del(key) {
+    delete MEM[key];
+    try { localStorage.removeItem('sosedi_' + key); } catch (e) {}
+  }
 };
 
 const DEMO_USER = {
@@ -115,15 +122,19 @@ function getUsers() {
 }
 function saveUsers(u) { DB.set('users', u); }
 function currentUser() {
-  const email = DB.get('session', null) || (sessionStorage.getItem('sosedi_session') && JSON.parse(sessionStorage.getItem('sosedi_session')));
+  let email = DB.get('session', null);
+  if (!email) { try { email = JSON.parse(sessionStorage.getItem('sosedi_session')); } catch (e) {} }
+  if (!email) email = MEM.tabSession || null;
   if (!email) return null;
   return getUsers().find(u => u.email === email) || null;
 }
 function login(email, remember) {
+  MEM.tabSession = email;
   if (remember) DB.set('session', email);
   else { DB.del('session'); try { sessionStorage.setItem('sosedi_session', JSON.stringify(email)); } catch (e) {} }
 }
 function logout() {
+  delete MEM.tabSession;
   DB.del('session');
   try { sessionStorage.removeItem('sosedi_session'); } catch (e) {}
 }

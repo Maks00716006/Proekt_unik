@@ -2,8 +2,8 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
+function startApp() {
 const ME = currentUser();
-if (!ME) { location.replace('index.html'); throw new Error('Нет сессии'); }
 
 let items = getItems();
 const F = { type: 'thing', cat: '', bld: '', status: '', q: '', sort: 'new' }; // фильтры каталога
@@ -38,7 +38,7 @@ document.addEventListener('click', e => {
   if (!e.target.closest('.menu-pop') && !e.target.closest('.kebab')) $$('.menu-pop').forEach(m => m.remove());
 });
 $('#burger').addEventListener('click', () => $('#nav').classList.toggle('open'));
-$('#logoutBtn').addEventListener('click', () => { logout(); location.href = 'index.html'; });
+$('#logoutBtn').addEventListener('click', () => { logout(); location.hash = ''; location.reload(); });
 $('#resetBtn').addEventListener('click', () => {
   DB.del('items'); items = getItems(); route(); updateBell();
   toast('↺', 'Демо-данные восстановлены');
@@ -546,3 +546,4 @@ window.addEventListener('hashchange', () => { route(); scrollTo({ top: 0 }); });
 
 route();
 updateBell();
+}
