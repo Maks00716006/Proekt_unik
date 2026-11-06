@@ -7,7 +7,6 @@ function startAuth() {
 
   applyI18n();
   $('#langName').textContent = t('langName');
-  requestAnimationFrame(() => requestAnimationFrame(() => $('.auth-root').classList.add('loaded')));
 
   /* --- язык --- */
   const lang = $('#lang'), langMenu = $('#langMenu');
@@ -28,16 +27,6 @@ function startAuth() {
   document.addEventListener('click', e => {
     if (!e.target.closest('#lang')) { langMenu.hidden = true; lang.classList.remove('open'); }
   });
-
-  /* --- рябь на кнопках --- */
-  $$('#authScreen .btn').forEach(b => b.addEventListener('pointerdown', e => {
-    const r = b.getBoundingClientRect(), s = Math.max(r.width, r.height);
-    const rp = document.createElement('span');
-    rp.className = 'ripple';
-    rp.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s / 2}px;top:${e.clientY - r.top - s / 2}px`;
-    b.appendChild(rp);
-    setTimeout(() => rp.remove(), 600);
-  }));
 
   function toast(msg) {
     const tt = $('#toast');
@@ -71,9 +60,8 @@ function startAuth() {
       u = { name: base.charAt(0).toUpperCase() + base.slice(1), email: key, login: base, pass, bld: '', room: '', tg: '' };
       users.push(u); saveUsers(users);
     }
-    const btn = f.querySelector('.btn');
-    btn.classList.add('loading');
-    setTimeout(() => { btn.classList.remove('loading'); pending = u; showDormStep(); }, 700);
+    pending = u;
+    showDormStep();
   });
 
   /* --- шаг 2: общежитие --- */
@@ -96,19 +84,8 @@ function startAuth() {
     if (!chosen) return;
     const users = getUsers(), u = users.find(x => x.email === pending.email);
     u.bld = chosen; saveUsers(users);
-    const btn = $('#dormNext');
-    btn.classList.add('loading');
-    setTimeout(() => {
-      btn.classList.remove('loading'); btn.classList.add('done');
-      login(u.email, true);
-      DB.set('justLoggedIn', true);
-      setTimeout(() => {
-        const r = btn.getBoundingClientRect(), rv = $('#reveal');
-        rv.style.left = (r.left + r.width / 2) + 'px';
-        rv.style.top = (r.top + r.height / 2) + 'px';
-        rv.classList.add('go');
-        setTimeout(() => showApp(), 650);
-      }, 450);
-    }, 600);
+    login(u.email, true);
+    DB.set('justLoggedIn', true);
+    showApp();
   });
 }

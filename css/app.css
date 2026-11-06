@@ -28,10 +28,6 @@ a { color: var(--link); text-decoration: none; }
 button, input, select, textarea { font: inherit; color: inherit; }
 [hidden] { display: none !important; }
 
-/* вход в приложение: синий экран сжимается */
-#appScreen .intro { position: fixed; inset: 0; background: var(--blue); z-index: 100; pointer-events: none; animation: introOut .7s cubic-bezier(.7,0,.3,1) .05s forwards; }
-@keyframes introOut { to { clip-path: circle(0% at 50% 50%); } }
-#appScreen .intro { clip-path: circle(150% at 50% 50%); }
 
 /* ================= Шапка ================= */
 #appScreen .topbar { background: var(--blue); color: #fff; position: sticky; top: 0; z-index: 20; }
@@ -95,7 +91,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 #appScreen .btn.success { background: var(--green); border-color: var(--green); color: #fff; }
 #appScreen .right-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
-#appScreen .filters { display: grid; grid-template-columns: 190px 190px 150px 1fr 190px 140px auto; gap: 10px; align-items: end; margin-bottom: 14px; }
+#appScreen .filters { display: grid; grid-template-columns: 210px 170px 1fr 210px auto; gap: 10px; align-items: end; margin-bottom: 14px; }
 #appScreen .filters label { display: block; font-size: 14px; }
 #appScreen .filters label > span { display: block; margin-bottom: 6px; }
 #appScreen .ctl { width: 100%; height: 38px; border: 1px solid var(--line); border-radius: 6px; padding: 0 12px; background: var(--surface); font-size: 14px; outline: none; }
@@ -129,8 +125,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 #appScreen .head { display: flex; gap: 8px; align-items: flex-start; }
 #appScreen .title { color: var(--link); font-weight: 500; line-height: 1.3; font-size: 14.5px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
 #appScreen .uses { color: var(--muted); font-size: 12px; white-space: nowrap; display: flex; gap: 4px; align-items: center; }
-#appScreen .kebab { background: none; border: 0; color: var(--link); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 4px; border-radius: 4px; font-weight: 700; }
-#appScreen .kebab:hover { background: var(--panel); }
 #appScreen .meta { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
 #appScreen .foot { margin-top: auto; padding-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
 #appScreen .badge { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; color: #fff; background: var(--green); }
@@ -142,9 +136,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 #appScreen .bar { height: 4px; background: #e9ecef; border-radius: 2px; overflow: hidden; width: 100%; max-width: 160px; }
 #appScreen .bar i { display: block; height: 100%; border-radius: 2px; background: var(--yellow); transition: width .8s ease; }
 #appScreen .card-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-#appScreen .menu-pop { position: absolute; right: 8px; top: 34px; z-index: 5; width: 190px; padding: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 10px 24px rgba(0,0,0,.14); }
-#appScreen .menu-pop button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 13.5px; }
-#appScreen .menu-pop button:hover { background: var(--panel); }
 
 #appScreen .empty { text-align: center; padding: 44px 16px; color: var(--muted); }
 #appScreen .empty .big { font-size: 44px; margin-bottom: 8px; }
@@ -189,7 +180,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 #appScreen .m-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; flex-wrap: wrap; }
 #appScreen .quick { display: flex; gap: 6px; flex-wrap: wrap; }
 #appScreen .quick button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 12px; font-size: 13px; cursor: pointer; }
-#appScreen .quick button.on, #appScreen .quick button:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-l); }
+#appScreen .quick button:hover { border-color: #9fb0ff; }
+#appScreen .quick button.on { border-color: var(--blue); color: #fff; background: var(--blue); }
 #appScreen .emoji-pick { display: flex; gap: 6px; flex-wrap: wrap; }
 #appScreen .emoji-pick button { width: 38px; height: 38px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); font-size: 20px; cursor: pointer; }
 #appScreen .emoji-pick button.on { border-color: var(--blue); background: var(--blue-l); }
@@ -213,10 +205,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 #appScreen .fbottom { text-align: center; font-size: 13px; padding: 14px 16px 22px; border-top: 1px solid rgba(255,255,255,.18); max-width: 760px; margin: 0 auto; opacity: .9; }
 
 /* ================= Адаптив ================= */
-#appScreen @media (max-width: 1300px) {
-  .filters { grid-template-columns: repeat(3, 1fr); }
-  .filters .f-search { grid-column: span 3; }
-  .container { padding: 48px 32px 64px; }
+@media (max-width: 1300px) {
+  #appScreen .filters { grid-template-columns: 1fr 1fr 1fr auto; }
+  #appScreen .filters .f-search { grid-column: 1 / -1; order: -1; }
+  #appScreen .container { padding: 48px 32px 64px; }
 }
 @media (max-width: 900px) {
   #appScreen .burger { display: block; }
@@ -233,7 +225,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   #appScreen .container { padding: 28px 16px 48px; }
   #appScreen h1 { font-size: 26px; }
   #appScreen .filters { grid-template-columns: 1fr 1fr; }
-  #appScreen .filters .f-search, #appScreen .filters .filter-btns { grid-column: span 2; }
+  #appScreen .filters .f-search, #appScreen .filters .filter-btns, #appScreen .filters .f-sort { grid-column: span 2; }
   #appScreen .filter-btns .btn { flex: 1; }
   #appScreen .grid { grid-template-columns: 1fr; padding: 0 8px 8px; }
   #appScreen .card { grid-template-columns: 92px 1fr; }
@@ -248,7 +240,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 
 /* общежития в подвале — две колонки */
-#appScreen .fdorms { display: grid; grid-template-columns: auto auto; gap: 8px 22px; }
 /* выбор общежития в окне */
 #appScreen .dorm-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 @media (max-width: 600px) { #appScreen .dorm-pick { grid-template-columns: 1fr; } }
@@ -348,3 +339,53 @@ body, #appScreen .card, #appScreen .group, #appScreen .ctl, #appScreen .btn, #ap
 #appScreen .msg-box small { color: var(--muted); font-size: 12px; }
 #appScreen .msg-box p { margin-top: 4px; font-size: 14px; line-height: 1.45; }
 :root[data-theme="dark"] #appScreen .ok-mark { background: #143524; }
+
+/* поле-группа без <label> (кнопки внутри label «нажимают» первую кнопку) */
+#appScreen .fld > span { display: block; font-size: 13.5px; margin-bottom: 5px; font-weight: 500; }
+#appScreen .fld > span small { font-weight: 400; }
+/* выбор иконки с подписями */
+#appScreen .icon-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 6px; }
+#appScreen .icon-pick button { display: grid; justify-items: center; gap: 2px; padding: 8px 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; transition: border-color .15s, background .15s; color: var(--text); }
+#appScreen .icon-pick button span { font-size: 22px; line-height: 1.1; }
+#appScreen .icon-pick button small { font-size: 11.5px; color: var(--muted); line-height: 1.2; text-align: center; }
+#appScreen .icon-pick button:hover { border-color: #9fb0ff; }
+#appScreen .icon-pick button.on { border-color: var(--blue); background: var(--blue-l); box-shadow: 0 0 0 3px rgba(20,56,240,.12); }
+#appScreen .icon-pick button.on small { color: var(--blue); font-weight: 600; }
+
+#appScreen .info-card #profDorm { margin-left: 8px; vertical-align: middle; }
+
+/* ================= Доработка под телефон ================= */
+#appScreen .logo span { white-space: nowrap; }
+#appScreen .f-toggle { display: none; }
+#appScreen .tg-btn.big { white-space: normal; height: auto; min-height: 46px; padding: 10px 14px; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  #appScreen .logo img { width: 26px; height: 26px; }
+  #appScreen .logo-badge { width: 32px; height: 32px; }
+  #appScreen .logo b { font-size: 12px; }
+  #appScreen .logo small { display: none; }
+  #appScreen .top-right { gap: 6px; }
+  #appScreen .topbar-in { gap: 10px; padding: 0 12px; }
+  #appScreen .burger { padding: 4px 6px; }
+  /* фильтры свёрнуты — поиск остаётся виден */
+  #appScreen .f-toggle { display: inline-flex; }
+  #appScreen .filters:not(.open) > :not(.f-search) { display: none; }
+  #appScreen .filters:not(.open) .f-search { grid-column: 1 / -1; }
+  #appScreen .seg { width: 100%; }
+  #appScreen .seg button { flex: 1; padding: 9px 6px; }
+  #appScreen .toprow .right-tools { width: 100%; }
+  #appScreen .toprow .right-tools .pill { margin-right: auto; }
+  /* владелец в карточке: кнопка «Написать» под именем */
+  #appScreen .owner { flex-wrap: wrap; }
+  #appScreen .owner .tg-btn.sm { width: 100%; justify-content: center; height: 38px; }
+  #appScreen .m-body { padding: 18px 16px 20px; }
+  #appScreen .m-actions { justify-content: stretch; }
+  #appScreen .contact .m-actions { flex-direction: column; align-items: stretch; }
+  #appScreen .contact .m-actions > div { justify-content: stretch; }
+  #appScreen .contact .m-actions .btn { flex: 1; }
+  #appScreen .toast { padding: 12px 14px; font-size: 13.5px; }
+  #appScreen .card-actions .btn { flex: 1; }
+}
+@media (max-width: 380px) {
+  #appScreen .logo b { font-size: 11px; letter-spacing: 0; }
+}
+@media (max-width: 600px) { #appScreen .ctl, #appScreen textarea.ctl { font-size: 16px; } }

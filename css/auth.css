@@ -18,11 +18,9 @@
 
 /* фон: фото кампуса, медленно приближается */
 #authScreen .bg {
-  position: fixed; inset: -20px; z-index: -2;
+  position: fixed; inset: 0; z-index: -2;
   background: #6f9fd8 url('../assets/campus-bg.jpg') center / cover no-repeat;
-  animation: kenburns 30s ease-in-out infinite alternate;
 }
-@keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.04); } }
 
 #authScreen .auth { min-height: calc(100vh - 5px); display: grid; place-items: center; padding: 32px 16px; }
 
@@ -30,35 +28,26 @@
 /* --u — «пиксель» фоновой картинки на этом экране. Карточка растёт вместе с фоном,
    чтобы всегда закрывать место, где на исходном фото было окно входа. */
 #authScreen .card {
-  --u: max(calc((100vw + 40px) / 1919), calc((100vh + 40px) / 870));
-  position: relative; width: min(100%, clamp(470px, calc(var(--u) * 484), 680px)); max-width: none;
-  min-height: min(calc(100vh - 40px), calc(var(--u) * 590));
+  --u: max(calc(100vw / 1919), calc(100vh / 870));
+  position: relative; width: min(100%, clamp(470px, calc(var(--u) * 470), 680px)); max-width: none;
+  min-height: min(calc(100vh - 40px), calc(var(--u) * 572));
   display: flex; flex-direction: column; justify-content: center;
   background: rgba(255,255,255,.84);
   -webkit-backdrop-filter: blur(16px) saturate(1.3); backdrop-filter: blur(16px) saturate(1.3);
   border: 1px solid rgba(255,255,255,.75);
   border-radius: 8px; padding: 56px 44px 26px;
   box-shadow: 0 24px 70px -24px rgba(8, 24, 90, .45);
-  opacity: 0; transform: translateY(30px) scale(.97);
-  transition: opacity .8s ease, transform .9s cubic-bezier(.2,.9,.3,1.1), max-width .4s ease;
 }
-#authScreen .auth-root.loaded .card { opacity: 1; transform: none; }
-#authScreen .card.wide { width: min(100%, clamp(560px, calc(var(--u) * 484), 680px)); }
+#authScreen .card.wide { width: min(100%, clamp(560px, calc(var(--u) * 470), 680px)); }
 
 /* логотип */
 #authScreen .brand { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 42px; }
 #authScreen .brand img { width: 104px; height: 104px; filter: drop-shadow(0 10px 18px rgba(20,56,240,.25)); }
-#authScreen .auth-root.loaded .brand img { animation: logoIn 1s cubic-bezier(.2,.9,.3,1.3) .2s both; }
-@keyframes logoIn { from { opacity: 0; transform: rotate(-200deg) scale(.4); } }
 #authScreen .brand b { display: block; font-family: 'Montserrat', 'Inter', sans-serif; font-size: 33px; white-space: nowrap; font-weight: 700; letter-spacing: 0; color: #3d4350; line-height: 1; }
 #authScreen .brand small { display: block; font-family: 'Montserrat', 'Inter', sans-serif; font-size: 17px; font-weight: 600; letter-spacing: .2px; color: #3d4350; text-transform: uppercase; margin-top: 7px; }
-#authScreen .auth-root.loaded .brand div { animation: slideIn .8s ease .45s both; }
-@keyframes slideIn { from { opacity: 0; transform: translateX(-16px); } }
 
 /* шаги (вход → общежитие) */
-#authScreen .step { animation: stepIn .45s ease both; }
 #authScreen .step[hidden] { display: none; }
-@keyframes stepIn { from { opacity: 0; transform: translateX(24px); } }
 
 /* поля — как на портале университета */
 #authScreen .form { display: grid; gap: 14px; }
@@ -110,9 +99,8 @@
   position: relative; display: flex; align-items: center; gap: 12px; cursor: pointer;
   padding: 13px 14px; border: 1.5px solid #d5d9e0; border-radius: 10px; background: #fff;
   transition: border-color .2s, background .2s, box-shadow .2s, transform .15s;
-  animation: dormIn .4s ease both; user-select: none; text-align: left;
+  user-select: none; text-align: left;
 }
-@keyframes dormIn { from { opacity: 0; transform: translateY(8px); } }
 :is(#authScreen, #appScreen) .dorm:hover { border-color: #9fb0ff; transform: translateY(-1px); }
 :is(#authScreen, #appScreen) .dorm input { position: absolute; opacity: 0; pointer-events: none; }
 :is(#authScreen, #appScreen) .dorm .radio {
@@ -143,13 +131,6 @@
 #authScreen .lang-menu button:hover { background: #f1f3f8; }
 #authScreen .lang-menu button.on { color: var(--blue); font-weight: 600; }
 
-/* переход в приложение: синий круг на весь экран */
-#authScreen .reveal {
-  position: fixed; z-index: 50; width: 40px; height: 40px; border-radius: 50%;
-  background: var(--blue); transform: translate(-50%, -50%) scale(0); pointer-events: none;
-}
-#authScreen .reveal.go { transition: transform .75s cubic-bezier(.7,0,.3,1); transform: translate(-50%, -50%) scale(90); }
-
 #authScreen .toast {
   position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 120px);
   background: #1d2125; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 14px;
@@ -164,7 +145,8 @@
   #authScreen .brand b { font-size: 22px; }
   #authScreen .brand small { font-size: 12px; }
   #authScreen .dorm-list { grid-template-columns: 1fr; }
-  #authScreen .inp { font-size: 14.5px; padding: 0 12px; }
+  #authScreen .inp { font-size: 16px; padding: 0 12px; }
+  #authScreen .inp::placeholder { font-size: 13.5px; }
 }
 @media (prefers-reduced-motion: reduce) {
   #authScreen *, #authScreen *::before, #authScreen *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }

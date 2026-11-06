@@ -6,16 +6,15 @@ function startApp() {
 const ME = currentUser();
 
 let items = getItems();
-const F = { type: 'thing', cat: '', bld: '', status: '', q: '', sort: 'new' }; // фильтры каталога
+let filtersOpen = false;
+const F = { type: 'all', cat: '', status: '', q: '', sort: 'new' }; // фильтры каталога (общежитие — всегда моё)
 const closedGroups = new Set();
 
 /* ---------- вход-анимация и приветствие ---------- */
+$('#intro')?.remove();
 if (DB.get('justLoggedIn', false)) {
   DB.del('justLoggedIn');
-  setTimeout(() => toast('✓', t('welcome'), ' ' + ME.name + ' · ' + dormName(ME.bld)), 700);
-  setTimeout(() => remindersToast(), 2200);
-} else {
-  $('#intro').remove();
+  setTimeout(() => remindersToast(), 400);
 }
 
 /* ---------- шапка ---------- */
@@ -36,35 +35,15 @@ togglePop($('#userBtn'), $('#userMenu'));
 togglePop($('#bellBtn'), $('#bellMenu'));
 document.addEventListener('click', e => {
   if (!e.target.closest('.dropdown')) $$('.dropdown').forEach(d => d.hidden = true);
-  if (!e.target.closest('.menu-pop') && !e.target.closest('.kebab')) $$('.menu-pop').forEach(m => m.remove());
 });
 $('#burger').addEventListener('click', () => $('#nav').classList.toggle('open'));
 $('#logoutBtn').addEventListener('click', () => { logout(); location.hash = ''; location.reload(); });
-/* тестовые данные: примеры объявлений и обменов для текущего пользователя */
-$('#fillBtn').addEventListener('click', () => {
-  $$('.dropdown').forEach(d => d.hidden = true);
-  const own = items.filter(i => i.owner === ME.email && !i.id.startsWith('i'));
-  const others = items.filter(i => i.owner !== ME.email && !i.id.startsWith('i'));
-  items = [...own, ...others, ...seedItems({ email: ME.email, name: ME.name, bld: ME.bld, room: ME.room, tg: ME.tg })];
-  persist(); route();
-  toast('✓', 'Примеры добавлены', ' Обмены и напоминания доступны в разделе «Мои обмены»');
-  updateBell();
-});
 $('#resetBtn').addEventListener('click', () => {
   $$('.dropdown').forEach(d => d.hidden = true);
   if (!confirm('Удалить все объявления и обмены? Это действие нельзя отменить.')) return;
   items = []; persist(); route();
   toast('✓', 'Объявления удалены');
 });
-/* подвал: список общежитий */
-function renderFooterDorms() {
-  $('#footDorms').innerHTML = DORMS.map(d => `<a href="#catalog" data-bld="${d.id}">${esc(dormName(d.id).replace(', корпуса 5 и 6', '').replace(', buildings 5 & 6', ''))}</a>`).join('');
-  $$('#footDorms a').forEach(a => a.addEventListener('click', () => {
-    F.bld = a.dataset.bld; F.type = 'all';
-    setTimeout(() => { route(); scrollTo({ top: 0, behavior: 'smooth' }); });
-  }));
-}
-
 /* смена общежития */
 function openDormPicker() {
   $$('.dropdown').forEach(d => d.hidden = true);
@@ -89,10 +68,6 @@ function openDormPicker() {
     toast('✓', t('dormSaved'), ' ' + dormName(chosen));
   });
 }
-$('#dormBtn').addEventListener('click', openDormPicker);
-$('#view').addEventListener('click', e => {
-  if (e.target.id === 'chDorm') { e.preventDefault(); openDormPicker(); }
-});
 
 /* язык */
 $('#langToggle').addEventListener('click', () => {
@@ -101,19 +76,20 @@ $('#langToggle').addEventListener('click', () => {
 });
 document.addEventListener('langchange', () => {
   $('#umRoom').textContent = where();
-  renderFooterDorms();
   route();
 });
 applyI18n();
-renderFooterDorms();
 
 /* ---------- тосты ---------- */
 function toast(icon, title, text = '') {
   const t = document.createElement('div');
   t.className = 'toast';
   t.innerHTML = `<span style="font-size:20px">${icon}</span><div><b>${esc(title)}</b>${text ? esc(text) : ''}</div>`;
-  $('#toasts').appendChild(t);
-  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 300); }, 3800);
+  const box = $('#toasts');
+  if (matchMedia('(max-width: 600px)').matches) [...box.children].forEach(x => x.remove());
+  else while (box.children.length >= 3) box.firstElementChild.remove();
+  box.appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 300); }, 3500);
 }
 
 /* ---------- сохранение ---------- */
@@ -141,7 +117,7 @@ function updateBell() {
   c.classList.toggle('pulse', rem.some(r => r.lvl === 'red'));
   $('#bellMenu').innerHTML = `<div class="dd-title">Напоминания</div>` + (rem.length
     ? rem.map(r => `<div class="rem" data-go="loans"><span class="dot" style="background:var(--${r.lvl === 'red' ? 'red' : 'yellow'})"></span><div>${esc(r.text)}<small>${esc(r.sub)}</small></div></div>`).join('')
-    : `<div class="empty-rem">🎉 Всё вернули вовремя.<br>Напоминаний нет</div>`);
+    : `<div class="empty-rem">Напоминаний нет</div>`);
   $$('#bellMenu .rem').forEach(r => r.addEventListener('click', () => location.hash = 'loans'));
 }
 
@@ -159,14 +135,11 @@ function remindersToast() {
 function statusHtml(it) {
   if (it.type === 'service') {
     return it.rating
-      ? `<span class="badge yellow">★ ${it.rating.toFixed(1)}</span><span>${it.reviews} ${plural(it.reviews, 'отзыв', 'отзыва', 'отзывов')}</span>`
-      : `<span class="badge gray">новое</span><span>пока без отзывов</span>`;
+      ? `<span class="badge yellow">★ ${it.rating.toFixed(1)}</span>`
+      : `<span class="badge gray">новое</span>`;
   }
-  if (it.status === 'free') return `<span class="badge">${t('available')}</span><span>${t('canTake')}</span>`;
-  const d = daysUntil(it.to);
-  const cls = d < 0 ? 'red' : d <= 1 ? 'orange' : 'blue';
-  const txt = d < 0 ? t('overdue') : `${t('until')} ${fmtDate(it.to)}`;
-  return `<span class="badge ${cls}">${t('taken')}</span><span>${txt}</span>`;
+  if (it.status === 'free') return `<span class="badge">${t('available')}</span>`;
+  return `<span class="badge blue">${t('taken')}</span>`;
 }
 
 function loanProgress(it) {
@@ -195,9 +168,6 @@ function cardHtml(it, opts = {}) {
     <div class="body">
       <div class="head">
         <span class="title">${esc(it.title)}</span>
-        <span class="uses" title="${it.type === 'service' ? 'Сколько раз помогли' : 'Сколько раз брали'}">
-          <svg width="16" height="12" viewBox="0 0 20 14" fill="#6a737b"><circle cx="6" cy="4" r="3"/><circle cx="14" cy="4" r="3"/><path d="M0 13c0-3 2.7-5 6-5s6 2 6 5zM10 13c.3-2.3 1.6-4 4-4 3.3 0 6 2 6 4z"/></svg>${it.uses}</span>
-        <button class="kebab" data-menu="${it.id}" aria-label="Действия">⋮</button>
       </div>
       <div class="meta">${mine ? t('mine') : esc(it.ownerName)}${ratingOf(it.owner) ? ` <span class="stars-mini">★ ${ratingOf(it.owner).avg.toFixed(1)}</span>` : ''} / ${esc(dormName(it.bld))}${it.room ? ' · ' + t('room') + ' ' + esc(it.room) : ''}</div>
       <div class="meta">${esc(it.cat)}</div>
@@ -209,26 +179,8 @@ function cardHtml(it, opts = {}) {
 
 function bindCards(root) {
   $$('.card', root).forEach(c => c.addEventListener('click', e => {
-    if (e.target.closest('.kebab, .card-actions, .menu-pop')) return;
+    if (e.target.closest('.card-actions')) return;
     openItem(c.dataset.id);
-  }));
-  $$('.kebab', root).forEach(k => k.addEventListener('click', e => {
-    e.stopPropagation();
-    $$('.menu-pop').forEach(m => m.remove());
-    const it = items.find(x => x.id === k.dataset.menu), mine = it.owner === ME.email;
-    const m = document.createElement('div');
-    m.className = 'menu-pop';
-    m.innerHTML = `<button data-a="open">🔎 Подробнее</button>` +
-      (mine ? `<button data-a="del">🗑 Удалить объявление</button>`
-            : `<button data-a="copy">📋 Скопировать контакт</button><button data-a="report">🚩 Пожаловаться</button>`);
-    k.closest('.card').appendChild(m);
-    m.addEventListener('click', ev => {
-      const a = ev.target.dataset.a; m.remove();
-      if (a === 'open') openItem(it.id);
-      if (a === 'del') deleteItem(it.id);
-      if (a === 'copy') { navigator.clipboard?.writeText(it.tg || '').catch(() => {}); toast('✓', 'Контакт скопирован', ` ${it.tg}`); }
-      if (a === 'report') toast('✓', 'Жалоба отправлена', ' Объявление будет проверено модератором');
-    });
   }));
   $$('[data-act]', root).forEach(b => b.addEventListener('click', e => {
     e.stopPropagation();
@@ -242,7 +194,7 @@ function pageCatalog() {
   let list = items.filter(it => {
     if (F.type !== 'all' && it.type !== F.type) return false;
     if (F.cat && it.cat !== F.cat) return false;
-    if (F.bld && it.bld !== F.bld) return false;
+    if (it.bld !== ME.bld) return false; // только моё общежитие
     if (F.status === 'free' && !(it.type === 'service' || it.status === 'free')) return false;
     if (F.status === 'busy' && it.status !== 'busy') return false;
     if (F.q) {
@@ -265,7 +217,7 @@ function pageCatalog() {
 
   $('#view').innerHTML = `
   <div class="page">
-    <h1>${t('catalog')}</h1>${ME.bld ? `<p class="meta" style="margin:-6px 0 14px">🏠 ${t('myDorm')}: <b>${esc(dormName(ME.bld))}</b> · <a href="#" id="chDorm">${t('changeDorm').toLowerCase()}</a></p>` : ''}
+    <h1>${t('catalog')}</h1>${ME.bld ? `<p class="meta" style="margin:-6px 0 14px">🏠 ${t('myDorm')}: <b>${esc(dormName(ME.bld))}</b></p>` : ''}
     <div class="toprow">
       <div class="seg">
         <button data-type="thing" class="${F.type === 'thing' ? 'on' : ''}">${t('things')}</button>
@@ -274,13 +226,12 @@ function pageCatalog() {
       </div>
       <div class="right-tools">
         <span class="pill">${t('ads')}: ${list.length}</span>
+        <button class="btn f-toggle" id="fToggle">⚙ ${LANG === 'en' ? 'Filters' : 'Фильтры'}${F.cat || F.status || F.sort !== 'new' ? ' •' : ''}</button>
         <button class="btn" id="newBtn">${t('post')}</button>
       </div>
     </div>
 
-    <div class="filters">
-      <label><span>${t('dorm')}</span>
-        <select class="ctl" id="fBld"><option value="">${t('allDorms')}</option>${DORMS.map(d => `<option value="${d.id}" ${F.bld === d.id ? 'selected' : ''}>${esc(dormName(d.id))}</option>`).join('')}</select></label>
+    <div class="filters ${filtersOpen ? 'open' : ''}">
       <label><span>${t('category')}</span>
         <select class="ctl" id="fCat"><option value="">${t('allCats')}</option>${cats.map(c => `<option ${F.cat === c ? 'selected' : ''}>${c}</option>`).join('')}</select></label>
       <label><span>${t('status')}</span>
@@ -291,15 +242,13 @@ function pageCatalog() {
         </select></label>
       <label class="f-search"><span>${t('search')}</span>
         <input class="ctl" id="fQ" placeholder="${t('searchPh')}" value="${esc(F.q)}"></label>
-      <label><span>${t('sort')}</span>
+      <label class="f-sort"><span>${t('sort')}</span>
         <select class="ctl" id="fSort">
           <option value="new" ${F.sort === 'new' ? 'selected' : ''}>${t('sortNew')}</option>
           <option value="popular" ${F.sort === 'popular' ? 'selected' : ''}>${t('sortPop')}</option>
           <option value="free" ${F.sort === 'free' ? 'selected' : ''}>${t('sortFree')}</option>
           <option value="name" ${F.sort === 'name' ? 'selected' : ''}>${t('sortName')}</option>
         </select></label>
-      <label><span>${t('view')}</span>
-        <select class="ctl" id="fView"><option>${t('compact')}</option></select></label>
       <div class="filter-btns">
         <button class="btn primary" id="fApply">${t('apply')}</button>
         <button class="btn" id="fReset">${t('reset')}</button>
@@ -323,17 +272,18 @@ function pageCatalog() {
 
   $$('.seg button').forEach(b => b.addEventListener('click', () => { F.type = b.dataset.type; F.cat = ''; pageCatalog(); }));
   const read = () => {
-    F.bld = $('#fBld').value; F.cat = $('#fCat').value; F.status = $('#fStatus').value;
+    F.cat = $('#fCat').value; F.status = $('#fStatus').value;
     F.q = $('#fQ').value.trim(); F.sort = $('#fSort').value;
   };
-  ['#fBld', '#fCat', '#fStatus', '#fSort'].forEach(s => $(s).addEventListener('change', () => { read(); pageCatalog(); }));
+  ['#fCat', '#fStatus', '#fSort'].forEach(s => $(s).addEventListener('change', () => { read(); pageCatalog(); }));
   let qt;
   $('#fQ').addEventListener('input', () => {
     clearTimeout(qt);
     qt = setTimeout(() => { read(); pageCatalog(); const q = $('#fQ'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }, 300);
   });
   $('#fApply').addEventListener('click', () => { read(); pageCatalog(); });
-  $('#fReset').addEventListener('click', () => { Object.assign(F, { cat: '', bld: '', status: '', q: '', sort: 'new' }); pageCatalog(); });
+  $('#fReset').addEventListener('click', () => { Object.assign(F, { cat: '', status: '', q: '', sort: 'new' }); pageCatalog(); });
+  $('#fToggle').addEventListener('click', () => { filtersOpen = !filtersOpen; $('.filters').classList.toggle('open', filtersOpen); });
   $('#newBtn').addEventListener('click', () => openNew(F.type === 'service' ? 'service' : 'thing'));
   $('#emptyNew')?.addEventListener('click', e => { e.preventDefault(); openNew('thing'); });
   $('#emptyNewBtn')?.addEventListener('click', () => openNew(F.type === 'service' ? 'service' : 'thing'));
@@ -464,8 +414,8 @@ function openItem(id) {
   } else if (it.type === 'thing' && !mine && it.status === 'free') {
     action = `
       <form class="form" id="actForm">
-        <label><span>Срок пользования</span>
-          <div class="quick">${[1, 2, 3, 7, 14].map(d => `<button type="button" data-d="${d}" class="${d === 3 ? 'on' : ''}">${d} ${plural(d, 'день', 'дня', 'дней')}</button>`).join('')}</div></label>
+        <div class="fld"><span>Срок пользования</span>
+          <div class="quick">${[1, 2, 3, 7, 14].map(d => `<button type="button" data-d="${d}" class="${d === 3 ? 'on' : ''}">${d} ${plural(d, 'день', 'дня', 'дней')}</button>`).join('')}</div></div>
         <label><span>Дата возврата</span><input class="ctl" type="date" name="to" value="${iso(addDays(3))}" min="${iso(addDays(1))}" max="${iso(addDays(30))}" required></label>
         <p class="meta">Напоминание придёт за день до срока и в день возврата.</p>
         <div class="m-actions"><button type="button" class="btn m-cancel">Отмена</button><button class="btn primary">Взять на время</button></div>
@@ -490,12 +440,12 @@ function openItem(id) {
     <div class="m-body">
       <div class="meta">${esc(it.cat)} · ${it.type === 'service' ? 'услуга' : 'вещь'}</div>
       <h3>${esc(it.title)}</h3>
-      <div class="foot" style="padding-top:4px">${statusHtml(it)}<span>· ${it.uses} ${it.type === 'service' ? plural(it.uses, 'раз помог(ла)', 'раза помог(ла)', 'раз помог(ла)') : plural(it.uses, 'раз брали', 'раза брали', 'раз брали')}</span></div>
+      <div class="foot" style="padding-top:4px">${statusHtml(it)}</div>
       <p class="desc">${esc(it.desc)}</p>
       <div class="owner">
         <span class="avatar">${initials(it.ownerName)}</span>
         <div style="flex:1"><b>${mine ? 'Ты' : esc(it.ownerName)}</b><small>${esc(dormName(it.bld))}${it.room ? ', комната ' + esc(it.room) : ''}</small></div>
-        ${it.tg && !mine ? `<a class="btn tg-btn sm" href="${tgUrl(it.tg)}" target="_blank" rel="noopener">${TG_ICON} Написать</a>` : ''}
+        ${it.tg && !mine ? `<button type="button" class="btn tg-btn sm" data-tg="${esc(it.tg)}">${TG_ICON} Написать</button>` : ''}
       </div>
       ${action}
     </div>`);
@@ -527,11 +477,49 @@ function openItem(id) {
   });
 }
 
+/* иконки с подписями; keys — слова в названии, по которым иконка выбирается сама */
+const ICONS = {
+  thing: [
+    { e: '🔧', l: 'Инструмент', cat: 'Инструменты', keys: ['дрел', 'шуруп', 'отвёрт', 'отверт', 'молот', 'ключ', 'инструм', 'паяль'] },
+    { e: '🪜', l: 'Стремянка', keys: ['стремян', 'лестниц'] },
+    { e: '✂️', l: 'Ножницы', keys: ['ножниц'] },
+    { e: '🔌', l: 'Техника', cat: 'Бытовая техника', keys: ['удлинит', 'зарядк', 'пылесос', 'техник'] },
+    { e: '🔊', l: 'Колонка', keys: ['колонк', 'наушник', 'динамик'] },
+    { e: '👔', l: 'Утюг, одежда', keys: ['утюг', 'отпарив', 'костюм', 'рубаш', 'одежд'] },
+    { e: '💨', l: 'Фен', keys: ['фен'] },
+    { e: '🍳', l: 'Кухня', cat: 'Кухня', keys: ['сковород', 'кастрюл', 'мультивар', 'блендер', 'миксер', 'посуд', 'чайник'] },
+    { e: '⚽', l: 'Мяч, спорт', cat: 'Спорт и отдых', keys: ['мяч', 'футбол', 'баскет', 'волейб', 'гантел', 'коврик', 'ракетк'] },
+    { e: '🚲', l: 'Велосипед', keys: ['велосип', 'самокат', 'ролик'] },
+    { e: '⛺', l: 'Туризм', keys: ['палатк', 'спальник', 'рюкзак', 'поход'] },
+    { e: '📚', l: 'Книги', cat: 'Учёба', keys: ['книг', 'учебник', 'задачник', 'конспект'] },
+    { e: '🧮', l: 'Калькулятор', keys: ['калькулят'] },
+    { e: '🎲', l: 'Настолки', cat: 'Игры', keys: ['игр', 'мафи', 'карты', 'шахмат', 'монопол'] },
+    { e: '🎸', l: 'Музыка', keys: ['гитар', 'укулел', 'синтез'] },
+    { e: '📦', l: 'Другое', keys: [] }
+  ],
+  service: [
+    { e: '💻', l: 'Ремонт ноутбука', cat: 'Ремонт техники', keys: ['ноутбук', 'компьют', 'windows', 'винд', 'пк'] },
+    { e: '📱', l: 'Ремонт телефона', keys: ['телефон', 'смартфон', 'экран'] },
+    { e: '🎓', l: 'Учёба', cat: 'Помощь с учёбой', keys: ['матан', 'математ', 'физик', 'химия', 'курсов', 'лаб', 'экзамен', 'учёб', 'учеб'] },
+    { e: '👨‍💻', l: 'Программирование', keys: ['python', 'питон', 'програм', 'код', 'java', 'c++'] },
+    { e: '🇬🇧', l: 'Языки', keys: ['англ', 'язык', 'немец', 'english'] },
+    { e: '💈', l: 'Стрижка', cat: 'Красота', keys: ['стриж', 'подстриг', 'бород'] },
+    { e: '💅', l: 'Маникюр, макияж', keys: ['маникюр', 'макияж', 'ногт', 'бров'] },
+    { e: '🍲', l: 'Готовка', keys: ['суп', 'приготов', 'готов', 'пирог', 'обед', 'выпеч'] },
+    { e: '📷', l: 'Фото', keys: ['фото', 'съёмк', 'съемк'] },
+    { e: '🎨', l: 'Дизайн', keys: ['дизайн', 'рису', 'презентац', 'плакат'] },
+    { e: '🚚', l: 'Переезд, мебель', keys: ['переезд', 'мебел', 'шкаф', 'собрать', 'донести'] },
+    { e: '✨', l: 'Другое', cat: 'Другое', keys: [] }
+  ]
+};
+function guessIcon(type, title, cat) {
+  const t = title.toLowerCase(), list = ICONS[type];
+  return list.find(i => i.keys.some(k => t.includes(k))) || list.find(i => i.cat === cat) || list[list.length - 1];
+}
+
 function openNew(type) {
   const cats = CATEGORIES[type];
-  const emojis = type === 'thing'
-    ? ['🔧', '🪜', '🔌', '🍳', '🧹', '👔', '⚽', '🚲', '⛺', '📚', '🧮', '🎲', '🎸', '📦']
-    : ['💻', '🎓', '🐍', '✂️', '🇬🇧', '📷', '🧑‍🍳', '📦', '🎨', '✨'];
+  const icons = ICONS[type];
   openModal(`
     <div class="m-body">
       <div class="toprow" style="margin-bottom:10px"><h3 style="margin:0">${type === 'thing' ? 'Разместить вещь' : 'Предложить услугу'}</h3><button class="btn sm m-x">✕</button></div>
@@ -540,25 +528,28 @@ function openNew(type) {
           <button type="button" data-t="thing" class="${type === 'thing' ? 'on' : ''}">Вещь</button>
           <button type="button" data-t="service" class="${type === 'service' ? 'on' : ''}">Услуга</button>
         </div>
-        <label><span>Название</span><input class="ctl" name="title" maxlength="70" required placeholder="${type === 'thing' ? 'Например: паяльник 60 Вт' : 'Например: консультации по английским'}"></label>
+        <label><span>Название</span><input class="ctl" name="title" maxlength="70" required placeholder="${type === 'thing' ? 'Например: футбольный мяч' : 'Например: починю ноутбук'}"></label>
         <div class="row2">
           <label><span>Категория</span><select class="ctl" name="cat">${cats.map(c => `<option>${c}</option>`).join('')}</select></label>
           <label><span>Контакт (Telegram)</span><input class="ctl" name="tg" value="${esc(ME.tg || '')}" placeholder="@username"></label>
         </div>
         <label><span>Описание</span><textarea class="ctl" name="desc" maxlength="400" placeholder="Состояние, комплектация, условия"></textarea></label>
-        <label><span>Иконка</span><div class="emoji-pick">${emojis.map((e, i) => `<button type="button" class="${i === 0 ? 'on' : ''}">${e}</button>`).join('')}</div></label>
+        <div class="fld"><span>Иконка <small class="meta">— подбирается по названию, можно выбрать вручную</small></span>
+          <div class="icon-pick">${icons.map(i => `<button type="button" data-e="${i.e}" title="${i.l}"><span>${i.e}</span><small>${i.l}</small></button>`).join('')}</div></div>
         <div class="m-actions"><button type="button" class="btn m-cancel">Отмена</button><button class="btn primary">Опубликовать</button></div>
       </form>
     </div>`);
   const f = $('#newForm');
-  let emoji = emojis[0];
+  let emoji = '', manual = false;
+  const mark = e => { emoji = e; $$('.icon-pick button', f).forEach(x => x.classList.toggle('on', x.dataset.e === e)); };
+  const auto = () => { if (!manual) mark(guessIcon(type, f.elements.title.value, f.cat.value).e); };
+  auto();
+  f.elements.title.addEventListener('input', auto);
+  f.cat.addEventListener('change', auto);
   $('.m-x').addEventListener('click', closeModal);
   $('.m-cancel').addEventListener('click', closeModal);
   $$('[data-t]', f).forEach(b => b.addEventListener('click', () => openNew(b.dataset.t)));
-  $$('.emoji-pick button', f).forEach(b => b.addEventListener('click', () => {
-    $$('.emoji-pick button', f).forEach(x => x.classList.remove('on'));
-    b.classList.add('on'); emoji = b.textContent;
-  }));
+  $$('.icon-pick button', f).forEach(b => b.addEventListener('click', () => { manual = true; mark(b.dataset.e); }));
   f.elements.title.focus();
   f.addEventListener('submit', e => {
     e.preventDefault();
@@ -611,7 +602,14 @@ function deleteItem(id) {
 /* ---------- контакт владельца после «Взять на время» / заявки на услугу ---------- */
 const TG_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3 18.7 19.4c-.2 1-.9 1.3-1.7.8l-4.8-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.9 8.9-8c.4-.3-.1-.5-.6-.2L6.5 13.2l-4.7-1.5c-1-.3-1-1 .2-1.5l18.4-7.1c.9-.3 1.6.2 1.5 1.2z"/></svg>';
 function longDate(isoStr) { return parseIso(isoStr).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }); }
-function tgUrl(tg) { return 'https://t.me/' + encodeURIComponent(String(tg).replace(/^@/, '')); }
+/* кнопка «Написать»: в демо-версии не открывает Telegram, а копирует ник */
+document.addEventListener('click', e => {
+  const b = e.target.closest('#appScreen .tg-btn[data-tg]');
+  if (!b) return;
+  const tg = b.dataset.tg;
+  navigator.clipboard?.writeText(tg).catch(() => {});
+  toast('✓', 'Ник скопирован: ' + tg, ' Найдите пользователя в Telegram и напишите ему');
+});
 
 function showContact(it, kind) {
   const first = it.ownerName.split(' ')[0];
@@ -630,7 +628,7 @@ function showContact(it, kind) {
         <div style="flex:1"><b>${esc(it.ownerName)}</b><small>${esc(dormName(it.bld))}${it.room ? ', комната ' + esc(it.room) : ''}</small></div>
       </div>
       ${it.tg ? `
-        <a class="btn tg-btn big" href="${tgUrl(it.tg)}" target="_blank" rel="noopener">${TG_ICON} Написать в Telegram ${esc(it.tg)}</a>
+        <button type="button" class="btn tg-btn big" data-tg="${esc(it.tg)}">${TG_ICON} Написать в Telegram ${esc(it.tg)}</button>
         <div class="msg-box"><small>Готовое сообщение</small><p id="msgText">${esc(msg)}</p></div>
         <div class="m-actions" style="justify-content:space-between">
           <button class="btn" id="copyMsg">📋 Скопировать сообщение</button>
@@ -756,7 +754,7 @@ function pageProfile() {
         <div class="info-card">
           <div><small>Имя</small><b>${esc(ME.name)}</b></div>
           <div><small>Логин</small><b>${esc(ME.login || ME.email)}</b></div>
-          <div><small>Общежитие</small><b>${esc(dormName(ME.bld))}</b></div>
+          <div><small>Общежитие</small><b>${esc(dormName(ME.bld))} <button type="button" class="btn sm" id="profDorm">Сменить</button></b></div>
           <div><small>Комната</small><b>${ME.room ? esc(ME.room) : '<span class="meta">не указана</span>'}</b></div>
           <div><small>Telegram</small><b>${ME.tg ? esc(ME.tg) : '<span class="meta">не указан</span>'}</b></div>
         </div>
@@ -771,6 +769,7 @@ function pageProfile() {
     </div>
   </div>`;
   $('#editProfile').addEventListener('click', openProfileEdit);
+  $('#profDorm').addEventListener('click', openDormPicker);
 }
 
 function openProfileEdit() {
@@ -783,7 +782,7 @@ function openProfileEdit() {
           <label><span>Комната</span><input class="ctl" name="room" maxlength="6" inputmode="numeric" value="${esc(ME.room || '')}"></label>
           <label><span>Telegram</span><input class="ctl" name="tg" maxlength="40" placeholder="@username" value="${esc(ME.tg || '')}"></label>
         </div>
-        <p class="meta">Общежитие меняется в меню профиля → «Сменить общежитие».</p>
+        <p class="meta">Общежитие меняется в профиле: «Контактные данные» → «Сменить».</p>
         <div class="m-actions"><button type="button" class="btn m-cancel">Отмена</button><button class="btn primary">Сохранить</button></div>
       </form>
     </div>`);
