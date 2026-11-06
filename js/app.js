@@ -271,15 +271,15 @@ function pageCatalog() {
     ${groups.length ? groups.map(g => `
       <section class="group ${closedGroups.has(g.c) ? 'closed' : ''}" data-g="${esc(g.c)}">
         <div class="group-h">
-          <span class="chev">▼</span><b>${CAT_EMOJI[g.c]} ${esc(g.c)}</b>
+          <span class="chev">▼</span><b>${esc(g.c)}</b>
           ${g.list.some(i => i.owner === ME.email) ? '<span class="tag">Есть моё</span>' : ''}
           <span class="pill">${t('ads')}: ${g.list.length} · ${t('freeOf')}: ${g.list.filter(i => i.type === 'service' || i.status === 'free').length}</span>
         </div>
         <div class="grid">${g.list.map((it, i) => cardHtml(it, { i })).join('')}</div>
       </section>`).join('')
     : items.length === 0
-      ? `<div class="group"><div class="empty"><div class="big">📭</div><b style="font-size:17px;color:var(--text)">${t('emptyTitle')}</b><br>${t('emptyText')}<br><br><button class="btn primary" id="emptyNewBtn">${t('post')}</button></div></div>`
-      : `<div class="group"><div class="empty"><div class="big">🔍</div>${t('noMatch')}<br><a href="#" id="emptyNew">${t('postOwn')}</a></div></div>`}
+      ? `<div class="group"><div class="empty"><b style="font-size:17px;color:var(--text)">${t('emptyTitle')}</b><br>${t('emptyText')}<br><br><button class="btn primary" id="emptyNewBtn">${t('post')}</button></div></div>`
+      : `<div class="group"><div class="empty">${t('noMatch')}<br><a href="#" id="emptyNew">${t('postOwn')}</a></div></div>`}
     <p class="meta" style="margin-top:8px">${t('nowFree')}: ${freeCount} / ${list.length}</p>
   </div>`;
 
@@ -323,13 +323,13 @@ function pageMy() {
         <button class="btn" id="newService">＋ Предложить услугу</button>
       </div>
     </div>
-    <section class="group"><div class="group-h"><span class="chev">▼</span><b>📦 Мои вещи</b><span class="pill">${things.length} · на руках у соседей: ${things.filter(t => t.status === 'busy').length}</span></div>
+    <section class="group"><div class="group-h"><span class="chev">▼</span><b>Мои вещи</b><span class="pill">${things.length} · на руках у соседей: ${things.filter(t => t.status === 'busy').length}</span></div>
       ${things.length ? `<div class="grid">${things.map((it, i) => cardHtml(it, { i, actions: act(it) })).join('')}</div>`
-        : `<div class="empty"><div class="big">📦</div>У вас пока нет размещённых вещей</div>`}
+        : `<div class="empty">У вас пока нет размещённых вещей</div>`}
     </section>
-    <section class="group"><div class="group-h"><span class="chev">▼</span><b>🤝 Мои услуги</b><span class="pill">${services.length}</span></div>
+    <section class="group"><div class="group-h"><span class="chev">▼</span><b>Мои услуги</b><span class="pill">${services.length}</span></div>
       ${services.length ? `<div class="grid">${services.map((it, i) => cardHtml(it, { i, actions: act(it) })).join('')}</div>`
-        : `<div class="empty"><div class="big">🤝</div>Вы можете предложить соседям свою услугу</div>`}
+        : `<div class="empty">Вы можете предложить соседям свою услугу</div>`}
     </section>
   </div>`;
   $('#newThing').addEventListener('click', () => openNew('thing'));
@@ -343,7 +343,7 @@ function pageLoans() {
   const lent = items.filter(i => i.status === 'busy' && i.owner === ME.email).sort((a, b) => a.to.localeCompare(b.to));
   const rem = getReminders();
   const notifBtn = ('Notification' in window && Notification.permission === 'default')
-    ? `<button class="btn" id="notifBtn">🔔 Включить уведомления в браузере</button>` : '';
+    ? `<button class="btn" id="notifBtn">Включить уведомления в браузере</button>` : '';
 
   $('#view').innerHTML = `
   <div class="page">
@@ -351,14 +351,14 @@ function pageLoans() {
       <h1 style="margin:0">${t('myLoans')}</h1>
       <div class="right-tools">${notifBtn}<span class="pill">Взято: ${took.length} · передано: ${lent.length}</span></div>
     </div>
-    ${rem.map(r => `<div class="alert ${r.lvl}"><span class="ai">${r.lvl === 'red' ? '⚠️' : '⏰'}</span><div class="grow"><b>${esc(r.text)}</b><div class="meta" style="color:inherit;opacity:.8">${esc(r.sub)}</div></div></div>`).join('')}
-    <section class="group"><div class="group-h"><span class="chev">▼</span><b>📥 Взято мной</b><span class="tag blue">Нужно вернуть</span><span class="pill">${took.length}</span></div>
-      ${took.length ? `<div class="grid">${took.map((it, i) => cardHtml(it, { i, loan: true, actions: `<button class="btn sm" data-act="ics" title="Добавить напоминание в календарь телефона">📅 В календарь</button><button class="btn sm success" data-act="ret">✓ Отметить возврат</button>` })).join('')}</div>`
-        : `<div class="empty"><div class="big">📭</div>Взятых вещей нет. <a href="#catalog">Перейти в каталог</a></div>`}
+    ${rem.map(r => `<div class="alert ${r.lvl}"><span class="ai">!</span><div class="grow"><b>${esc(r.text)}</b><div class="meta" style="color:inherit;opacity:.8">${esc(r.sub)}</div></div></div>`).join('')}
+    <section class="group"><div class="group-h"><span class="chev">▼</span><b>Взято мной</b><span class="tag blue">Нужно вернуть</span><span class="pill">${took.length}</span></div>
+      ${took.length ? `<div class="grid">${took.map((it, i) => cardHtml(it, { i, loan: true, actions: `<button class="btn sm" data-act="ics" title="Добавить напоминание в календарь телефона">В календарь</button><button class="btn sm success" data-act="ret">✓ Отметить возврат</button>` })).join('')}</div>`
+        : `<div class="empty">Взятых вещей нет. <a href="#catalog">Перейти в каталог</a></div>`}
     </section>
-    <section class="group"><div class="group-h"><span class="chev">▼</span><b>📤 Передано мной</b><span class="pill">${lent.length}</span></div>
-      ${lent.length ? `<div class="grid">${lent.map((it, i) => cardHtml(it, { i, loan: true, actions: `<button class="btn sm" data-act="remind">🔔 Напомнить</button><button class="btn sm success" data-act="ret">✓ Подтвердить возврат</button>` })).join('')}</div>`
-        : `<div class="empty"><div class="big">📭</div>Ваши вещи сейчас никому не переданы</div>`}
+    <section class="group"><div class="group-h"><span class="chev">▼</span><b>Передано мной</b><span class="pill">${lent.length}</span></div>
+      ${lent.length ? `<div class="grid">${lent.map((it, i) => cardHtml(it, { i, loan: true, actions: `<button class="btn sm" data-act="remind">Напомнить</button><button class="btn sm success" data-act="ret">✓ Подтвердить возврат</button>` })).join('')}</div>`
+        : `<div class="empty">Ваши вещи сейчас никому не переданы</div>`}
     </section>
   </div>`;
   $('#notifBtn')?.addEventListener('click', async () => {
@@ -436,10 +436,10 @@ function openItem(id) {
   } else if (iBorrow) {
     const p = loanProgress(it);
     action = `<p><span class="badge ${p.bcls}">${p.label}</span> &nbsp;Вернуть до <b>${fmtDate(it.to)}</b></p>
-      <div class="m-actions"><button class="btn" id="icsBtn">📅 В календарь</button><button class="btn success" id="retBtn">✓ Отметить возврат</button></div>`;
+      <div class="m-actions"><button class="btn" id="icsBtn">В календарь</button><button class="btn success" id="retBtn">✓ Отметить возврат</button></div>`;
   } else if (it.status === 'busy') {
     action = `<p class="meta">Сейчас у: <b>${esc(it.borrowerName)}</b> до ${fmtDate(it.to)}.${mine ? '' : ' Вещь станет доступна после возврата.'}</p>
-      ${mine ? `<div class="m-actions"><button class="btn" id="remBtn">🔔 Напомнить</button><button class="btn success" id="retBtn">✓ Подтвердить возврат</button></div>` : ''}`;
+      ${mine ? `<div class="m-actions"><button class="btn" id="remBtn">Напомнить</button><button class="btn success" id="retBtn">✓ Подтвердить возврат</button></div>` : ''}`;
   } else if (mine) {
     action = `<p class="meta">Это ваше объявление. Оно доступно всем жителям общежитий.</p>
       <div class="m-actions"><button class="btn danger" id="delBtn">Удалить объявление</button></div>`;
@@ -477,13 +477,13 @@ function openItem(id) {
   f.addEventListener('submit', e => {
     e.preventDefault();
     if (it.type === 'service') {
-      it.uses++; logEvent({ type: 'service', who: ME.email, owner: it.owner, item: it.title });
+      it.uses++; logEvent({ type: 'service', who: ME.email, whoName: ME.name, owner: it.owner, ownerName: it.ownerName, item: it.title });
       persist(); closeModal(); showContact(it, 'service');
     } else {
       const to = f.to.value;
       if (!to || daysUntil(to) < 1) { toast('!', 'Дата возврата должна быть не раньше завтрашнего дня'); return; }
       Object.assign(it, { status: 'busy', borrower: ME.email, borrowerName: ME.name, from: iso(today()), to });
-      it.uses++; logEvent({ type: 'borrow', who: ME.email, owner: it.owner, item: it.title });
+      it.uses++; logEvent({ type: 'borrow', who: ME.email, whoName: ME.name, owner: it.owner, ownerName: it.ownerName, item: it.title });
       persist(); closeModal(); route();
       showContact(it, 'thing');
     }
@@ -592,7 +592,7 @@ function returnItem(id) {
   const wasMine = it.owner === ME.email;
   const other = wasMine ? { email: it.borrower, name: it.borrowerName } : { email: it.owner, name: it.ownerName };
   const onTime = it.to ? daysUntil(it.to) >= 0 : true;
-  logEvent({ type: 'return', who: wasMine ? it.borrower : ME.email, owner: it.owner, item: it.title, onTime });
+  logEvent({ type: 'return', who: wasMine ? it.borrower : ME.email, whoName: wasMine ? it.borrowerName : ME.name, owner: it.owner, ownerName: it.ownerName, item: it.title, onTime });
   Object.assign(it, { status: 'free', borrower: null, borrowerName: null, from: null, to: null });
   persist(); route();
   setTimeout(() => askRating(other, it.title), 500);
@@ -644,8 +644,8 @@ function showContact(it, kind) {
         <button type="button" class="btn tg-btn big" data-tg="${esc(it.tg)}">${TG_ICON} Написать в Telegram ${esc(it.tg)}</button>
         <div class="msg-box"><small>Готовое сообщение</small><p id="msgText">${esc(msg)}</p></div>
         <div class="m-actions" style="justify-content:space-between">
-          <button class="btn" id="copyMsg">📋 Скопировать сообщение</button>
-          <div style="display:flex;gap:8px">${kind === 'thing' ? '<button class="btn" id="cIcs">📅 В календарь</button>' : ''}<button class="btn primary m-cancel">Готово</button></div>
+          <button class="btn" id="copyMsg">Скопировать сообщение</button>
+          <div style="display:flex;gap:8px">${kind === 'thing' ? '<button class="btn" id="cIcs">В календарь</button>' : ''}<button class="btn primary m-cancel">Готово</button></div>
         </div>`
       : `<p class="meta">Владелец не указал Telegram — найдите его по адресу: ${esc(dormName(it.bld))}${it.room ? ', комната ' + esc(it.room) : ''}.</p>
         <div class="m-actions"><button class="btn primary m-cancel">Готово</button></div>`}
@@ -698,7 +698,7 @@ function askRating(other, title) {
   });
   $('.m-cancel').addEventListener('click', closeModal);
   $('#rateSend').addEventListener('click', () => {
-    logEvent({ type: 'rate', from: ME.email, to: other.email, stars, item: title });
+    logEvent({ type: 'rate', from: ME.email, to: other.email, toName: other.name, stars, item: title });
     closeModal(); route();
     toast('✓', 'Оценка сохранена');
   });
@@ -731,15 +731,15 @@ function pageProfile() {
   const active = items.filter(i => i.owner === ME.email).length;
   const stars = st.rating ? '★★★★★'.slice(0, Math.round(st.rating.avg)).padEnd(5, '☆') : '☆☆☆☆☆';
   const userIds = new Map(getUsers().map(u => [u.email, u.name]));
-  const nameOf = e => userIds.get(e) || '—';
+  const nameOf = (email, saved) => saved || userIds.get(email) || 'сосед';
   const hist = getLog().filter(e => e.who === ME.email || e.owner === ME.email || e.to === ME.email || e.from === ME.email)
     .filter(e => e.type !== 'post').slice(-12).reverse();
   const line = e => {
     const mine = e.who === ME.email || e.from === ME.email;
-    if (e.type === 'borrow') return mine ? ['📥', `Взяли во временное пользование «${e.item}»`, `у ${nameOf(e.owner)}`] : ['📤', `Передали «${e.item}»`, `${nameOf(e.who)}`];
-    if (e.type === 'return') return mine ? ['✅', `Вернули «${e.item}»`, e.onTime ? 'в срок' : 'с опозданием'] : ['✅', `Вам вернули «${e.item}»`, e.onTime ? 'в срок' : 'с опозданием'];
-    if (e.type === 'service') return mine ? ['📨', `Заявка на услугу «${e.item}»`, `исполнитель: ${nameOf(e.owner)}`] : ['🤝', `Заявка на вашу услугу «${e.item}»`, `от ${nameOf(e.who)}`];
-    if (e.type === 'rate') return mine ? ['⭐', `Вы оценили обмен «${e.item}»`, '★'.repeat(e.stars)] : ['⭐', `Вас оценили за «${e.item}»`, '★'.repeat(e.stars)];
+    if (e.type === 'borrow') return mine ? ['↓', `Взяли во временное пользование «${e.item}»`, `владелец: ${nameOf(e.owner, e.ownerName)}`] : ['↑', `Передали «${e.item}»`, `получатель: ${nameOf(e.who, e.whoName)}`];
+    if (e.type === 'return') return mine ? ['✓', `Вернули «${e.item}»`, e.onTime ? 'в срок' : 'с опозданием'] : ['✓', `Вам вернули «${e.item}»`, e.onTime ? 'в срок' : 'с опозданием'];
+    if (e.type === 'service') return mine ? ['→', `Заявка на услугу «${e.item}»`, `исполнитель: ${nameOf(e.owner, e.ownerName)}`] : ['←', `Заявка на вашу услугу «${e.item}»`, `заказчик: ${nameOf(e.who, e.whoName)}`];
+    if (e.type === 'rate') return mine ? ['★', `Вы оценили обмен «${e.item}»`, '★'.repeat(e.stars)] : ['★', `Вас оценили за «${e.item}»`, '★'.repeat(e.stars)];
     return null;
   };
   $('#view').innerHTML = `
@@ -755,10 +755,10 @@ function pageProfile() {
     </div>
 
     <div class="tiles">
-      <div class="tile"><span>📦</span><b>${active}</b><small>активных объявлений</small></div>
-      <div class="tile"><span>📥</span><b>${st.borrowed}</b><small>взято во временное пользование</small></div>
-      <div class="tile"><span>📤</span><b>${st.lent}</b><small>передано соседям</small></div>
-      <div class="tile"><span>🤝</span><b>${st.helped}</b><small>оказано услуг</small></div>
+      <div class="tile"><b>${active}</b><small>активных объявлений</small></div>
+      <div class="tile"><b>${st.borrowed}</b><small>взято во временное пользование</small></div>
+      <div class="tile"><b>${st.lent}</b><small>передано соседям</small></div>
+      <div class="tile"><b>${st.helped}</b><small>оказано услуг</small></div>
     </div>
 
     <div class="prof-grid">
@@ -818,10 +818,12 @@ function openProfileEdit() {
 }
 
 /* тёмная тема */
+const MOON_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M20.7 14.6A8.5 8.5 0 0 1 9.4 3.3a8.5 8.5 0 1 0 11.3 11.3z"/></svg>';
+const SUN_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="#fff"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>';
 function applyTheme(th) {
   document.documentElement.dataset.theme = th;
   const b = $('#themeBtn');
-  if (b) b.textContent = th === 'dark' ? '☀️' : '🌙';
+  if (b) b.innerHTML = th === 'dark' ? SUN_ICON : MOON_ICON;
 }
 applyTheme(DB.get('theme', 'light'));
 $('#themeBtn').addEventListener('click', () => {

@@ -144,7 +144,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 #appScreen .alert { display: flex; gap: 14px; align-items: center; padding: 14px 16px; border-radius: var(--radius); margin-bottom: 14px; border: 1px solid; animation: pageIn .4s ease; }
 #appScreen .alert.red { background: #fdecee; border-color: #f6c1c8; color: #8d1324; }
 #appScreen .alert.yellow { background: var(--surface)8e1; border-color: #f5d77a; color: #6b4f00; }
-#appScreen .alert .ai { font-size: 24px; }
+#appScreen .alert .ai { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 15px; color: #fff; background: currentColor; flex: none; }
+#appScreen .alert.red .ai { background: var(--red); }
+#appScreen .alert.yellow .ai { background: #d79a00; }
+#appScreen .alert .ai { color: #fff !important; }
 #appScreen .alert .grow { flex: 1; }
 
 /* «О сервисе» */
@@ -290,7 +293,6 @@ body, #appScreen .card, #appScreen .group, #appScreen .ctl, #appScreen .btn, #ap
 #appScreen .hero-stars small { font-size: 13px; color: #fff; letter-spacing: 0; opacity: .85; margin-left: 6px; }
 #appScreen .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 14px; }
 #appScreen .tile { border: 1px solid var(--line); border-radius: 12px; padding: 18px; background: var(--surface); display: grid; gap: 2px; animation: cardIn .4s ease both; }
-#appScreen .tile span { font-size: 24px; }
 #appScreen .tile b { font-size: 28px; font-weight: 800; letter-spacing: -.5px; }
 #appScreen .tile small { color: var(--muted); }
 @media (max-width: 900px) {
@@ -316,7 +318,7 @@ body, #appScreen .card, #appScreen .group, #appScreen .ctl, #appScreen .btn, #ap
 #appScreen .info-card > div:last-child { border-bottom: 0; }
 #appScreen .info-card small { color: var(--muted); }
 #appScreen .info-card.hist > .h-row { justify-content: flex-start; align-items: center; }
-#appScreen .h-row > span { font-size: 20px; width: 38px; height: 38px; border-radius: 10px; background: var(--blue-l); display: grid; place-items: center; flex: none; }
+#appScreen .h-row > span { font-size: 17px; font-weight: 700; color: var(--blue); width: 38px; height: 38px; border-radius: 10px; background: var(--blue-l); display: grid; place-items: center; flex: none; }
 #appScreen .h-row b { display: block; font-weight: 500; }
 #appScreen .h-row small { display: block; }
 

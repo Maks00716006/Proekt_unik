@@ -30,7 +30,9 @@
 - Или откройте `index.html` из папки проекта.
 - Или включите GitHub Pages (Settings → Pages → Branch: `main` / `(root)`).
 
-После правок пересоберите файл: `python3 tools/build_single.py`.
+После правок:
+- `python3 tools/stamp_version.py` — новый номер версии у CSS/JS, чтобы браузеры не брали старые файлы из кеша;
+- `python3 tools/build_single.py` — пересобрать `dist/sosedi.html`.
 
 > Это демо-версия: все данные хранятся в `localStorage` браузера, сервера и базы данных нет.
 
