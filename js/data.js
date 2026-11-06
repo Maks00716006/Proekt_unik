@@ -6,25 +6,45 @@
 const MEM = {};
 const DB = {
   get(key, def) {
-    try { const v = localStorage.getItem('sosedi_' + key); if (v !== null) return JSON.parse(v); } catch (e) {}
+    try { const v = localStorage.getItem('sosedi2_' + key); if (v !== null) return JSON.parse(v); } catch (e) {}
     return key in MEM ? JSON.parse(MEM[key]) : def;
   },
   set(key, val) {
     MEM[key] = JSON.stringify(val);
-    try { localStorage.setItem('sosedi_' + key, MEM[key]); } catch (e) {}
+    try { localStorage.setItem('sosedi2_' + key, MEM[key]); } catch (e) {}
   },
   del(key) {
     delete MEM[key];
-    try { localStorage.removeItem('sosedi_' + key); } catch (e) {}
+    try { localStorage.removeItem('sosedi2_' + key); } catch (e) {}
   }
 };
 
 const DEMO_USER = {
   name: 'Иван Петров', email: 'demo@sosedi.ru', pass: 'demo123',
-  bld: '2', room: '315', tg: '@ivan_petrov'
+  bld: 'm2', room: '315', tg: '@ivan_petrov', login: 'demo'
 };
 
-const BUILDINGS = ['1', '2', '3', '4'];
+/* общежития */
+const DORMS = [
+  { id: 'm1', ru: 'Металлург 1', en: 'Metallurg 1' },
+  { id: 'm2', ru: 'Металлург 2', en: 'Metallurg 2' },
+  { id: 'm3', ru: 'Металлург 3', en: 'Metallurg 3' },
+  { id: 'm4', ru: 'Металлург 4', en: 'Metallurg 4' },
+  { id: 'g1', ru: 'Горняк 1', en: 'Gornyak 1' },
+  { id: 'g2', ru: 'Горняк 2', en: 'Gornyak 2' },
+  { id: 'dk', ru: 'Дом-коммуна', en: 'Dom-Kommuna' },
+  { id: 'dsg', ru: 'ДСГ, корпуса 5 и 6', en: 'DSG, buildings 5 & 6',
+    ruFull: 'Дорогомиловский студенческий городок', enFull: 'Dorogomilovsky student campus' }
+];
+function dormName(id) {
+  const d = DORMS.find(x => x.id === id);
+  if (!d) return '—';
+  return (typeof LANG !== 'undefined' && LANG === 'en') ? d.en : d.ru;
+}
+const DORM_BY_TG = {
+  '@artem_k': 'm2', '@olga_sm': 'm1', '@masha_leb': 'm2', '@timur_a': 'g1', '@alina_e': 'm3',
+  '@nik_orlov': 'dsg', '@egor_v': 'g2', '@dasha_k': 'm4', '@serg_fix': 'dk', '@anna_math': 'm1', '@rus_cut': 'g1'
+};
 
 const CATEGORIES = {
   thing: ['Инструменты', 'Бытовая техника', 'Кухня', 'Спорт и отдых', 'Учёба', 'Игры'],
@@ -123,7 +143,7 @@ function getUsers() {
 function saveUsers(u) { DB.set('users', u); }
 function currentUser() {
   let email = DB.get('session', null);
-  if (!email) { try { email = JSON.parse(sessionStorage.getItem('sosedi_session')); } catch (e) {} }
+  if (!email) { try { email = JSON.parse(sessionStorage.getItem('sosedi2_session')); } catch (e) {} }
   if (!email) email = MEM.tabSession || null;
   if (!email) return null;
   return getUsers().find(u => u.email === email) || null;
@@ -131,18 +151,18 @@ function currentUser() {
 function login(email, remember) {
   MEM.tabSession = email;
   if (remember) DB.set('session', email);
-  else { DB.del('session'); try { sessionStorage.setItem('sosedi_session', JSON.stringify(email)); } catch (e) {} }
+  else { DB.del('session'); try { sessionStorage.setItem('sosedi2_session', JSON.stringify(email)); } catch (e) {} }
 }
 function logout() {
   delete MEM.tabSession;
   DB.del('session');
-  try { sessionStorage.removeItem('sosedi_session'); } catch (e) {}
+  try { sessionStorage.removeItem('sosedi2_session'); } catch (e) {}
 }
 
 /* ===== объявления ===== */
 function seedItems() {
   const me = DEMO_USER;
-  const N = (name, bld, room, tg) => ({ ownerName: name, owner: tg + '@n', bld, room, tg });
+  const N = (name, bld, room, tg) => ({ ownerName: name, owner: tg + '@n', bld: DORM_BY_TG[tg] || 'm1', room, tg });
   let id = 1;
   const mk = (o) => Object.assign({
     id: 'i' + (id++), status: 'free', uses: 0, created: iso(addDays(-id)), rating: null, reviews: 0

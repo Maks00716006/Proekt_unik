@@ -92,7 +92,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 #appScreen .btn.success { background: var(--green); border-color: var(--green); color: #fff; }
 #appScreen .right-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
-#appScreen .filters { display: grid; grid-template-columns: 130px 200px 160px 1fr 200px 140px auto; gap: 10px; align-items: end; margin-bottom: 14px; }
+#appScreen .filters { display: grid; grid-template-columns: 190px 190px 150px 1fr 190px 140px auto; gap: 10px; align-items: end; margin-bottom: 14px; }
 #appScreen .filters label { display: block; font-size: 14px; }
 #appScreen .filters label > span { display: block; margin-bottom: 6px; }
 #appScreen .ctl { width: 100%; height: 38px; border: 1px solid var(--line); border-radius: 6px; padding: 0 12px; background: #fff; font-size: 14px; outline: none; }
@@ -243,3 +243,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
   #appScreen .toasts { left: 16px; right: 16px; bottom: 16px; }
   #appScreen .toast { min-width: 0; max-width: none; }
 }
+
+/* общежития в подвале — две колонки */
+#appScreen .fdorms { display: grid; grid-template-columns: auto auto; gap: 8px 22px; }
+/* выбор общежития в окне */
+#appScreen .dorm-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 600px) { #appScreen .dorm-pick { grid-template-columns: 1fr; } }

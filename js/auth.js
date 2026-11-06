@@ -1,39 +1,36 @@
-/* ===== Страница входа ===== */
+/* ===== Экран входа → выбор общежития ===== */
 function startAuth() {
   getUsers(); // создаёт демо-аккаунт при первом запуске
 
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
+  applyI18n();
+  $('#langName').textContent = t('langName');
   requestAnimationFrame(() => requestAnimationFrame(() => $('.auth-root').classList.add('loaded')));
 
-  /* --- подсветка карточки за курсором --- */
-  const card = $('#card'), glow = $('#glow');
-  card.addEventListener('mousemove', e => {
-    const r = card.getBoundingClientRect();
-    glow.style.left = (e.clientX - r.left) + 'px';
-    glow.style.top = (e.clientY - r.top) + 'px';
+  /* --- язык --- */
+  const lang = $('#lang'), langMenu = $('#langMenu');
+  const markLang = () => $$('#langMenu button').forEach(b => b.classList.toggle('on', b.dataset.lang === LANG));
+  markLang();
+  $('#langBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    langMenu.hidden = !langMenu.hidden;
+    lang.classList.toggle('open', !langMenu.hidden);
+  });
+  $$('#langMenu button').forEach(b => b.addEventListener('click', () => {
+    setLang(b.dataset.lang);
+    $('#langName').textContent = t('langName');
+    markLang();
+    langMenu.hidden = true; lang.classList.remove('open');
+    if (!$('#stepDorm').hidden) renderDorms();
+  }));
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#lang')) { langMenu.hidden = true; lang.classList.remove('open'); }
   });
 
-  /* --- вкладки --- */
-  const tabs = $('.tabs');
-  $$('.tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
-  function switchTab(name) {
-    $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-    tabs.classList.toggle('reg', name === 'register');
-    $('#loginForm').classList.toggle('hidden', name !== 'login');
-    $('#regForm').classList.toggle('hidden', name !== 'register');
-  }
-
-  /* --- показать пароль --- */
-  $$('.eye').forEach(b => b.addEventListener('click', () => {
-    const inp = b.parentElement.querySelector('input');
-    inp.type = inp.type === 'password' ? 'text' : 'password';
-    b.textContent = inp.type === 'password' ? '👁' : '🙈';
-  }));
-
   /* --- рябь на кнопках --- */
-  $$('.btn').forEach(b => b.addEventListener('pointerdown', e => {
+  $$('#authScreen .btn').forEach(b => b.addEventListener('pointerdown', e => {
     const r = b.getBoundingClientRect(), s = Math.max(r.width, r.height);
     const rp = document.createElement('span');
     rp.className = 'ripple';
@@ -42,41 +39,68 @@ function startAuth() {
     setTimeout(() => rp.remove(), 600);
   }));
 
-  /* --- индикатор сложности пароля --- */
-  const regPass = $('#regForm [name=pass]');
-  regPass.addEventListener('input', () => {
-    const v = regPass.value;
-    let s = 0;
-    if (v.length >= 6) s++;
-    if (v.length >= 10) s++;
-    if (/[A-ZА-Я]/.test(v) && /[a-zа-я]/.test(v)) s++;
-    if (/\d/.test(v) && /[^\wА-Яа-я]/.test(v)) s++;
-    const colors = ['#e02f44', '#f6a609', '#7bc043', '#18a957'];
-    const labels = ['слабый', 'так себе', 'хороший', 'отличный'];
-    $$('.strength i').forEach((i, k) => i.style.background = k < s ? colors[s - 1] : '#e6e9ef');
-    $('#strengthTxt').textContent = v ? labels[Math.max(0, s - 1)] : '';
+  function toast(msg) {
+    const tt = $('#toast');
+    tt.textContent = msg; tt.classList.add('show');
+    clearTimeout(tt._h); tt._h = setTimeout(() => tt.classList.remove('show'), 3000);
+  }
+  $('#forgot').addEventListener('click', e => { e.preventDefault(); toast(t('forgotToast')); });
+
+  function shake(inputs) {
+    inputs.forEach(i => { i.classList.remove('bad'); void i.offsetWidth; i.classList.add('bad'); });
+  }
+
+  /* --- шаг 1: вход --- */
+  let pending = null; // вошёл, но ещё не выбрал общежитие
+  $('#loginForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const f = e.target, err = $('#loginErr');
+    const loginVal = f.login.value.trim(), pass = f.pass.value;
+    err.textContent = '';
+    if (!loginVal || !pass) {
+      err.textContent = t('errEmpty');
+      return shake([f.login, f.pass].filter(i => !i.value.trim()));
+    }
+    const key = loginVal.toLowerCase();
+    const users = getUsers();
+    let u = users.find(x => x.email === key || (x.login || '').toLowerCase() === key);
+    if (u && u.pass !== pass) { err.textContent = t('errPass'); return shake([f.login, f.pass]); }
+    if (!u) {
+      // демо-режим: первый вход с новым логином создаёт аккаунт
+      const base = key.split('@')[0];
+      u = { name: base.charAt(0).toUpperCase() + base.slice(1), email: key, login: base, pass, bld: '', room: '', tg: '' };
+      users.push(u); saveUsers(users);
+    }
+    const btn = f.querySelector('.btn');
+    btn.classList.add('loading');
+    setTimeout(() => { btn.classList.remove('loading'); pending = u; showDormStep(); }, 700);
   });
 
-  function toast(msg) {
-    const t = $('#toast');
-    t.textContent = msg; t.classList.add('show');
-    clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2600);
+  /* --- шаг 2: общежитие --- */
+  let chosen = '';
+  function renderDorms() {
+    $('#dormList').innerHTML = dormOptionsHtml(chosen);
+    bindDormOptions($('#dormList'), id => { chosen = id; $('#dormNext').disabled = false; });
+    applyI18n($('#stepDorm'));
+  }
+  function showDormStep() {
+    chosen = DORMS.some(d => d.id === pending.bld) ? pending.bld : '';
+    $('#stepLogin').hidden = true;
+    $('#stepDorm').hidden = false;
+    $('#card').classList.add('wide');
+    $('#dormNext').disabled = !chosen;
+    renderDorms();
   }
 
-  function fail(form, errEl, msg, fields) {
-    errEl.textContent = msg;
-    fields.forEach(n => {
-      const f = form.querySelector(`[name=${n}]`).closest('.field');
-      f.classList.remove('bad'); void f.offsetWidth; f.classList.add('bad');
-    });
-  }
-
-  /* успешный вход: галочка → синий круг на весь экран → приложение */
-  function success(btn, email, remember) {
+  $('#dormNext').addEventListener('click', () => {
+    if (!chosen) return;
+    const users = getUsers(), u = users.find(x => x.email === pending.email);
+    u.bld = chosen; saveUsers(users);
+    const btn = $('#dormNext');
     btn.classList.add('loading');
     setTimeout(() => {
       btn.classList.remove('loading'); btn.classList.add('done');
-      login(email, remember);
+      login(u.email, true);
       DB.set('justLoggedIn', true);
       setTimeout(() => {
         const r = btn.getBoundingClientRect(), rv = $('#reveal');
@@ -85,56 +109,6 @@ function startAuth() {
         rv.classList.add('go');
         setTimeout(() => showApp(), 650);
       }, 450);
-    }, 900);
-  }
-
-  /* --- вход --- */
-  $('#loginForm').addEventListener('submit', e => {
-    e.preventDefault();
-    const f = e.target, err = $('#loginErr');
-    const email = f.email.value.trim().toLowerCase(), pass = f.pass.value;
-    err.textContent = '';
-    if (!email || !pass) return fail(f, err, 'Заполни email и пароль', ['email', 'pass'].filter(n => !f[n].value));
-    const u = getUsers().find(x => x.email === email);
-    if (!u || u.pass !== pass) return fail(f, err, 'Неверный email или пароль', ['email', 'pass']);
-    success(f.querySelector('.btn.primary'), u.email, f.remember.checked);
-  });
-
-  $('#demoBtn').addEventListener('click', () => {
-    const f = $('#loginForm');
-    f.email.value = ''; f.pass.value = '';
-    // «печатаем» данные демо-аккаунта
-    const typeInto = (inp, text, cb) => {
-      let i = 0;
-      (function step() {
-        inp.value = text.slice(0, ++i);
-        if (i < text.length) setTimeout(step, 35); else cb && cb();
-      })();
-    };
-    typeInto(f.email, DEMO_USER.email, () =>
-      typeInto(f.pass, DEMO_USER.pass, () => f.requestSubmit()));
-  });
-
-  $('#forgot').addEventListener('click', e => {
-    e.preventDefault();
-    toast('Демо-версия: используй демо-аккаунт demo@sosedi.ru / demo123');
-  });
-
-  /* --- регистрация --- */
-  $('#regForm').addEventListener('submit', e => {
-    e.preventDefault();
-    const f = e.target, err = $('#regErr');
-    const name = f.fullname.value.trim(), email = f.email.value.trim().toLowerCase();
-    const room = f.room.value.trim(), pass = f.pass.value, bld = f.bld.value;
-    err.textContent = '';
-    if (name.length < 2) return fail(f, err, 'Как тебя зовут?', ['fullname']);
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail(f, err, 'Похоже, email с ошибкой', ['email']);
-    if (!/^\d{1,4}$/.test(room)) return fail(f, err, 'Укажи номер комнаты цифрами', ['room']);
-    if (pass.length < 6) return fail(f, err, 'Пароль — минимум 6 символов', ['pass']);
-    const users = getUsers();
-    if (users.some(u => u.email === email)) return fail(f, err, 'Такой email уже зарегистрирован', ['email']);
-    users.push({ name, email, pass, bld, room, tg: '' });
-    saveUsers(users);
-    success(f.querySelector('.btn.primary'), email, true);
+    }, 600);
   });
 }

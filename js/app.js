@@ -12,7 +12,7 @@ const closedGroups = new Set();
 /* ---------- вход-анимация и приветствие ---------- */
 if (DB.get('justLoggedIn', false)) {
   DB.del('justLoggedIn');
-  setTimeout(() => toast('👋', `Привет, ${ME.name.split(' ')[0]}!`, 'Рады видеть тебя в «Соседях»'), 700);
+  setTimeout(() => toast('👋', `${t('hello')}, ${ME.name.split(' ')[0]}!`, ' ' + t('welcome') + ' · ' + dormName(ME.bld)), 700);
   setTimeout(() => remindersToast(), 2200);
 } else {
   $('#intro').remove();
@@ -21,7 +21,8 @@ if (DB.get('justLoggedIn', false)) {
 /* ---------- шапка ---------- */
 $('#avatar').textContent = initials(ME.name);
 $('#umName').textContent = ME.name;
-$('#umRoom').textContent = `Корпус ${ME.bld}, комната ${ME.room}`;
+const where = () => dormName(ME.bld) + (ME.room ? `, ${t('room')} ${ME.room}` : '');
+$('#umRoom').textContent = where();
 
 function togglePop(btn, pop) {
   btn.addEventListener('click', e => {
@@ -43,10 +44,56 @@ $('#resetBtn').addEventListener('click', () => {
   DB.del('items'); items = getItems(); route(); updateBell();
   toast('↺', 'Демо-данные восстановлены');
 });
-$$('.footer [data-bld]').forEach(a => a.addEventListener('click', () => {
-  F.bld = a.dataset.bld; F.type = 'all';
-  setTimeout(() => { route(); scrollTo({ top: 0, behavior: 'smooth' }); });
-}));
+/* подвал: список общежитий */
+function renderFooterDorms() {
+  $('#footDorms').innerHTML = DORMS.map(d => `<a href="#catalog" data-bld="${d.id}">${esc(dormName(d.id).replace(', корпуса 5 и 6', '').replace(', buildings 5 & 6', ''))}</a>`).join('');
+  $$('#footDorms a').forEach(a => a.addEventListener('click', () => {
+    F.bld = a.dataset.bld; F.type = 'all';
+    setTimeout(() => { route(); scrollTo({ top: 0, behavior: 'smooth' }); });
+  }));
+}
+
+/* смена общежития */
+function openDormPicker() {
+  $$('.dropdown').forEach(d => d.hidden = true);
+  let chosen = ME.bld;
+  openModal(`
+    <div class="m-body">
+      <div class="toprow" style="margin-bottom:6px"><h3 style="margin:0">${t('changeDorm')}</h3><button class="btn sm m-x">✕</button></div>
+      <p class="meta" style="margin-bottom:14px">${t('dormSub')}</p>
+      <div class="dorm-pick" id="dormPick">${dormOptionsHtml(chosen)}</div>
+      <div class="m-actions" style="margin-top:16px"><button class="btn primary" id="dormSave">${t('save')}</button></div>
+    </div>`);
+  $('.m-x').addEventListener('click', closeModal);
+  bindDormOptions($('#dormPick'), id => { chosen = id; });
+  $('#dormSave').addEventListener('click', () => {
+    const users = getUsers(), u = users.find(x => x.email === ME.email);
+    if (u) { u.bld = chosen; saveUsers(users); }
+    ME.bld = chosen;
+    items.forEach(it => { if (it.owner === ME.email) it.bld = chosen; });
+    persist(); closeModal();
+    $('#umRoom').textContent = where();
+    route();
+    toast('🏠', t('dormSaved'), ' ' + dormName(chosen));
+  });
+}
+$('#dormBtn').addEventListener('click', openDormPicker);
+$('#view').addEventListener('click', e => {
+  if (e.target.id === 'chDorm') { e.preventDefault(); openDormPicker(); }
+});
+
+/* язык */
+$('#langToggle').addEventListener('click', () => {
+  setLang(LANG === 'ru' ? 'en' : 'ru');
+  $$('.dropdown').forEach(d => d.hidden = true);
+});
+document.addEventListener('langchange', () => {
+  $('#umRoom').textContent = where();
+  renderFooterDorms();
+  route();
+});
+applyI18n();
+renderFooterDorms();
 
 /* ---------- тосты ---------- */
 function toast(icon, title, text = '') {
@@ -67,8 +114,8 @@ function getReminders() {
     if (it.status !== 'busy' || !it.to) return;
     const d = daysUntil(it.to);
     if (it.borrower === ME.email) {
-      if (d < 0) list.push({ lvl: 'red', it, text: `Верни «${it.title}» — просрочено на ${-d} ${plural(-d, 'день', 'дня', 'дней')}`, sub: `Владелец: ${it.ownerName}, корп. ${it.bld}, комн. ${it.room}` });
-      else if (d <= 1) list.push({ lvl: 'yellow', it, text: `Верни «${it.title}» ${d === 0 ? 'сегодня' : 'завтра'}`, sub: `Владелец: ${it.ownerName}, корп. ${it.bld}, комн. ${it.room}` });
+      if (d < 0) list.push({ lvl: 'red', it, text: `Верни «${it.title}» — просрочено на ${-d} ${plural(-d, 'день', 'дня', 'дней')}`, sub: `Владелец: ${it.ownerName}, ${dormName(it.bld)}, комн. ${it.room}` });
+      else if (d <= 1) list.push({ lvl: 'yellow', it, text: `Верни «${it.title}» ${d === 0 ? 'сегодня' : 'завтра'}`, sub: `Владелец: ${it.ownerName}, ${dormName(it.bld)}, комн. ${it.room}` });
     } else if (it.owner === ME.email && d < 0) {
       list.push({ lvl: 'red', it, text: `${it.borrowerName} не вернул(а) «${it.title}»`, sub: `Срок истёк ${fmtDate(it.to)}` });
     }
@@ -103,11 +150,11 @@ function statusHtml(it) {
       ? `<span class="badge yellow">★ ${it.rating.toFixed(1)}</span><span>${it.reviews} ${plural(it.reviews, 'отзыв', 'отзыва', 'отзывов')}</span>`
       : `<span class="badge gray">новое</span><span>пока без отзывов</span>`;
   }
-  if (it.status === 'free') return `<span class="badge">Свободна</span><span>можно взять</span>`;
+  if (it.status === 'free') return `<span class="badge">${t('available')}</span><span>${t('canTake')}</span>`;
   const d = daysUntil(it.to);
   const cls = d < 0 ? 'red' : d <= 1 ? 'orange' : 'blue';
-  const txt = d < 0 ? 'просрочено' : `до ${fmtDate(it.to)}`;
-  return `<span class="badge ${cls}">Занята</span><span>${txt}</span>`;
+  const txt = d < 0 ? t('overdue') : `${t('until')} ${fmtDate(it.to)}`;
+  return `<span class="badge ${cls}">${t('taken')}</span><span>${txt}</span>`;
 }
 
 function loanProgress(it) {
@@ -140,7 +187,7 @@ function cardHtml(it, opts = {}) {
           <svg width="16" height="12" viewBox="0 0 20 14" fill="#6a737b"><circle cx="6" cy="4" r="3"/><circle cx="14" cy="4" r="3"/><path d="M0 13c0-3 2.7-5 6-5s6 2 6 5zM10 13c.3-2.3 1.6-4 4-4 3.3 0 6 2 6 4z"/></svg>${it.uses}</span>
         <button class="kebab" data-menu="${it.id}" aria-label="Действия">⋮</button>
       </div>
-      <div class="meta">${mine ? 'Моё' : esc(it.ownerName)} / Корп. ${esc(it.bld)} · комн. ${esc(it.room)}</div>
+      <div class="meta">${mine ? t('mine') : esc(it.ownerName)} / ${esc(dormName(it.bld))}${it.room ? ' · ' + t('room') + ' ' + esc(it.room) : ''}</div>
       <div class="meta">${esc(it.cat)}</div>
       <div class="foot">${foot}</div>
       ${extra}${actions}
@@ -206,44 +253,44 @@ function pageCatalog() {
 
   $('#view').innerHTML = `
   <div class="page">
-    <h1>Каталог</h1>
+    <h1>${t('catalog')}</h1>${ME.bld ? `<p class="meta" style="margin:-6px 0 14px">🏠 ${t('myDorm')}: <b>${esc(dormName(ME.bld))}</b> · <a href="#" id="chDorm">${t('changeDorm').toLowerCase()}</a></p>` : ''}
     <div class="toprow">
       <div class="seg">
-        <button data-type="thing" class="${F.type === 'thing' ? 'on' : ''}">Вещи</button>
-        <button data-type="service" class="${F.type === 'service' ? 'on' : ''}">Услуги</button>
-        <button data-type="all" class="${F.type === 'all' ? 'on' : ''}">Все объявления</button>
+        <button data-type="thing" class="${F.type === 'thing' ? 'on' : ''}">${t('things')}</button>
+        <button data-type="service" class="${F.type === 'service' ? 'on' : ''}">${t('services')}</button>
+        <button data-type="all" class="${F.type === 'all' ? 'on' : ''}">${t('allAds')}</button>
       </div>
       <div class="right-tools">
-        <span class="pill">Объявлений: ${list.length}</span>
-        <button class="btn" id="newBtn">＋ Выложить</button>
+        <span class="pill">${t('ads')}: ${list.length}</span>
+        <button class="btn" id="newBtn">${t('post')}</button>
       </div>
     </div>
 
     <div class="filters">
-      <label><span>Корпус</span>
-        <select class="ctl" id="fBld"><option value="">Все</option>${BUILDINGS.map(b => `<option value="${b}" ${F.bld === b ? 'selected' : ''}>Корпус ${b}</option>`).join('')}</select></label>
-      <label><span>Категория</span>
-        <select class="ctl" id="fCat"><option value="">Все категории</option>${cats.map(c => `<option ${F.cat === c ? 'selected' : ''}>${c}</option>`).join('')}</select></label>
-      <label><span>Статус</span>
+      <label><span>${t('dorm')}</span>
+        <select class="ctl" id="fBld"><option value="">${t('allDorms')}</option>${DORMS.map(d => `<option value="${d.id}" ${F.bld === d.id ? 'selected' : ''}>${esc(dormName(d.id))}</option>`).join('')}</select></label>
+      <label><span>${t('category')}</span>
+        <select class="ctl" id="fCat"><option value="">${t('allCats')}</option>${cats.map(c => `<option ${F.cat === c ? 'selected' : ''}>${c}</option>`).join('')}</select></label>
+      <label><span>${t('status')}</span>
         <select class="ctl" id="fStatus">
-          <option value="">Любой</option>
-          <option value="free" ${F.status === 'free' ? 'selected' : ''}>Свободно</option>
-          <option value="busy" ${F.status === 'busy' ? 'selected' : ''}>Занято</option>
+          <option value="">${t('any')}</option>
+          <option value="free" ${F.status === 'free' ? 'selected' : ''}>${t('sFree')}</option>
+          <option value="busy" ${F.status === 'busy' ? 'selected' : ''}>${t('sBusy')}</option>
         </select></label>
-      <label class="f-search"><span>Поиск</span>
-        <input class="ctl" id="fQ" placeholder="Найти вещь или услугу" value="${esc(F.q)}"></label>
-      <label><span>Упорядочить</span>
+      <label class="f-search"><span>${t('search')}</span>
+        <input class="ctl" id="fQ" placeholder="${t('searchPh')}" value="${esc(F.q)}"></label>
+      <label><span>${t('sort')}</span>
         <select class="ctl" id="fSort">
-          <option value="new" ${F.sort === 'new' ? 'selected' : ''}>Сначала новые</option>
-          <option value="popular" ${F.sort === 'popular' ? 'selected' : ''}>По популярности</option>
-          <option value="free" ${F.sort === 'free' ? 'selected' : ''}>Сначала свободные</option>
-          <option value="name" ${F.sort === 'name' ? 'selected' : ''}>По названию</option>
+          <option value="new" ${F.sort === 'new' ? 'selected' : ''}>${t('sortNew')}</option>
+          <option value="popular" ${F.sort === 'popular' ? 'selected' : ''}>${t('sortPop')}</option>
+          <option value="free" ${F.sort === 'free' ? 'selected' : ''}>${t('sortFree')}</option>
+          <option value="name" ${F.sort === 'name' ? 'selected' : ''}>${t('sortName')}</option>
         </select></label>
-      <label><span>Вид</span>
-        <select class="ctl" id="fView"><option>Компактно</option></select></label>
+      <label><span>${t('view')}</span>
+        <select class="ctl" id="fView"><option>${t('compact')}</option></select></label>
       <div class="filter-btns">
-        <button class="btn primary" id="fApply">Применить</button>
-        <button class="btn" id="fReset">Сбросить</button>
+        <button class="btn primary" id="fApply">${t('apply')}</button>
+        <button class="btn" id="fReset">${t('reset')}</button>
       </div>
     </div>
 
@@ -252,12 +299,12 @@ function pageCatalog() {
         <div class="group-h">
           <span class="chev">▼</span><b>${CAT_EMOJI[g.c]} ${esc(g.c)}</b>
           ${g.list.some(i => i.owner === ME.email) ? '<span class="tag">Есть моё</span>' : ''}
-          <span class="pill">Объявлений: ${g.list.length} · свободно: ${g.list.filter(i => i.type === 'service' || i.status === 'free').length}</span>
+          <span class="pill">${t('ads')}: ${g.list.length} · ${t('freeOf')}: ${g.list.filter(i => i.type === 'service' || i.status === 'free').length}</span>
         </div>
         <div class="grid">${g.list.map((it, i) => cardHtml(it, { i })).join('')}</div>
       </section>`).join('')
     : `<div class="group"><div class="empty"><div class="big">🔍</div>Ничего не нашлось. Попробуй изменить фильтры<br>или <a href="#" id="emptyNew">выложи своё объявление</a>.</div></div>`}
-    <p class="meta" style="margin-top:8px">Сейчас доступно: ${freeCount} из ${list.length}</p>
+    <p class="meta" style="margin-top:8px">${t('nowFree')}: ${freeCount} / ${list.length}</p>
   </div>`;
 
   $$('.seg button').forEach(b => b.addEventListener('click', () => { F.type = b.dataset.type; F.cat = ''; pageCatalog(); }));
@@ -291,7 +338,7 @@ function pageMy() {
   $('#view').innerHTML = `
   <div class="page">
     <div class="toprow">
-      <h1 style="margin:0">Мои объявления</h1>
+      <h1 style="margin:0">${t('myAds')}</h1>
       <div class="right-tools">
         <span class="pill">Всего: ${mine.length}</span>
         <button class="btn primary" id="newThing">＋ Выложить вещь</button>
@@ -323,7 +370,7 @@ function pageLoans() {
   $('#view').innerHTML = `
   <div class="page">
     <div class="toprow">
-      <h1 style="margin:0">Мои займы</h1>
+      <h1 style="margin:0">${t('myLoans')}</h1>
       <div class="right-tools">${notifBtn}<span class="pill">Взял: ${took.length} · одолжил: ${lent.length}</span></div>
     </div>
     ${rem.map(r => `<div class="alert ${r.lvl}"><span class="ai">${r.lvl === 'red' ? '⚠️' : '⏰'}</span><div class="grow"><b>${esc(r.text)}</b><div class="meta" style="color:inherit;opacity:.8">${esc(r.sub)}</div></div></div>`).join('')}
@@ -349,14 +396,14 @@ function pageAbout() {
   $('#view').innerHTML = `
   <div class="page">
     <div class="about-hero">
-      <h1>Обмен вещами и услугами между студентами общежития</h1>
+      <h1>${t('aboutTitle')}</h1>
       <p>Многие вещи нужны пару раз в год — дрель, стремянка, инструменты, — и соседям приходится покупать такие же.
       А кто-то умеет чинить ноутбуки или объяснять матан, но об этом никто не знает. Найти нужное через общие чаты сложно.
       «Соседи» собирают всё в одном месте: бери вещи на время, выкладывай свои, предлагай помощь — а сервис напомнит, когда пора вернуть.</p>
     </div>
     <h2 class="sec">Как это работает</h2>
     <div class="steps">
-      <div class="step"><div class="n">1</div><b>Найди</b><p>Ищи вещь или услугу в каталоге с фильтром по корпусу и категории.</p></div>
+      <div class="step"><div class="n">1</div><b>Найди</b><p>Ищи вещь или услугу в каталоге с фильтром по общежитию и категории.</p></div>
       <div class="step"><div class="n">2</div><b>Договорись</b><p>Выбери срок возврата и напиши соседу — контакты в карточке.</p></div>
       <div class="step"><div class="n">3</div><b>Пользуйся</b><p>Срок и прогресс займа видны в разделе «Мои займы».</p></div>
       <div class="step"><div class="n">4</div><b>Верни вовремя</b><p>Сервис напомнит за день до срока и сообщит владельцу о просрочке.</p></div>
@@ -428,7 +475,7 @@ function openItem(id) {
       <p class="desc">${esc(it.desc)}</p>
       <div class="owner">
         <span class="avatar">${initials(it.ownerName)}</span>
-        <div style="flex:1"><b>${mine ? 'Ты' : esc(it.ownerName)}</b><small>Корпус ${esc(it.bld)}, комната ${esc(it.room)}${it.tg ? ' · ' + esc(it.tg) : ''}</small></div>
+        <div style="flex:1"><b>${mine ? 'Ты' : esc(it.ownerName)}</b><small>${esc(dormName(it.bld))}${it.room ? ', комната ' + esc(it.room) : ''}${it.tg ? ' · ' + esc(it.tg) : ''}</small></div>
       </div>
       ${action}
     </div>`);
@@ -453,7 +500,7 @@ function openItem(id) {
       if (!to || daysUntil(to) < 1) { toast('⚠️', 'Выбери дату возврата не раньше завтра'); return; }
       Object.assign(it, { status: 'busy', borrower: ME.email, borrowerName: ME.name, from: iso(today()), to });
       it.uses++; persist(); closeModal(); route();
-      toast('🎉', 'Вещь твоя до ' + fmtDate(to), ` Забрать: ${it.ownerName.split(' ')[0]}, корп. ${it.bld}, комн. ${it.room}. Напомним о возврате!`);
+      toast('🎉', 'Вещь твоя до ' + fmtDate(to), ` Забрать: ${it.ownerName.split(' ')[0]}, ${dormName(it.bld)}${it.room ? ', комн. ' + it.room : ''}. Напомним о возврате!`);
     }
   });
 }

@@ -15,90 +15,45 @@
 <!-- ===== Экран входа ===== -->
 <div id="authScreen" hidden>
 <div class="auth-root">
-
   <div class="bg" aria-hidden="true"></div>
-  <div class="bg-shade" aria-hidden="true"></div>
 
   <main class="auth">
-      <div class="card" id="card">
-        <div class="card-glow" id="glow"></div>
+    <div class="card" id="card">
+      <div class="brand">
+        <img src="assets/favicon.svg" alt="">
+        <div><b>СОСЕДИ</b><small data-i18n="brandSub">обмен в общежитии</small></div>
+      </div>
 
-        <div class="brand">
-          <img src="assets/favicon.svg" alt="">
-          <div><b>СОСЕДИ</b><small>обмен в общежитии</small></div>
-        </div>
-
-        <div class="tabs" role="tablist">
-          <button class="tab active" data-tab="login" role="tab">Вход</button>
-          <button class="tab" data-tab="register" role="tab">Регистрация</button>
-          <span class="tab-ind" id="tabInd"></span>
-        </div>
-
-        <!-- Вход -->
+      <!-- Шаг 1: вход -->
+      <section class="step" id="stepLogin">
         <form id="loginForm" class="form" novalidate>
-          <label class="field">
-            <input type="email" name="email" placeholder=" " autocomplete="email" required>
-            <span>Email</span>
-            <i class="ico">✉️</i>
-          </label>
-          <label class="field">
-            <input type="password" name="pass" placeholder=" " autocomplete="current-password" required>
-            <span>Пароль</span>
-            <i class="ico">🔒</i>
-            <button type="button" class="eye" aria-label="Показать пароль">👁</button>
-          </label>
-          <div class="row">
-            <label class="check"><input type="checkbox" name="remember" checked><i></i> Запомнить меня</label>
-            <a href="#" class="link" id="forgot">Забыли пароль?</a>
-          </div>
+          <input class="inp" type="text" name="login" autocomplete="username" data-i18n-ph="loginPh" placeholder="Логин или адрес электронной почты">
+          <input class="inp" type="password" name="pass" autocomplete="current-password" data-i18n-ph="passPh" placeholder="Пароль">
           <p class="err" id="loginErr"></p>
-          <button class="btn primary" type="submit"><span class="lbl">Войти</span><span class="spin"></span><span class="tick">✓</span></button>
-          <div class="divider"><span>или</span></div>
-          <button class="btn ghost" type="button" id="demoBtn">⚡ Войти в демо-аккаунт</button>
+          <button class="btn" type="submit"><span class="lbl" data-i18n="loginBtn">Войти</span><span class="spin"></span><span class="tick">✓</span></button>
+          <a href="#" class="link" id="forgot" data-i18n="forgot">Забыли пароль?</a>
         </form>
+      </section>
 
-        <!-- Регистрация -->
-        <form id="regForm" class="form hidden" novalidate>
-          <label class="field">
-            <input type="text" name="fullname" placeholder=" " autocomplete="name" required>
-            <span>Имя и фамилия</span>
-            <i class="ico">🙂</i>
-          </label>
-          <label class="field">
-            <input type="email" name="email" placeholder=" " autocomplete="email" required>
-            <span>Email</span>
-            <i class="ico">✉️</i>
-          </label>
-          <div class="two">
-            <label class="field">
-              <select name="bld" required>
-                <option value="1">Корпус 1</option><option value="2">Корпус 2</option>
-                <option value="3">Корпус 3</option><option value="4">Корпус 4</option>
-              </select>
-              <i class="ico">🏢</i>
-            </label>
-            <label class="field">
-              <input type="text" name="room" placeholder=" " inputmode="numeric" required>
-              <span>Комната</span>
-              <i class="ico">🚪</i>
-            </label>
+      <!-- Шаг 2: выбор общежития -->
+      <section class="step" id="stepDorm" hidden>
+        <h2 class="step-title" data-i18n="dormTitle">Выберите общежитие</h2>
+        <p class="step-sub" data-i18n="dormSub">Покажем вещи и услуги соседей рядом с вами</p>
+        <div class="dorm-list" id="dormList" role="radiogroup"></div>
+        <button class="btn" id="dormNext" style="width:100%" disabled><span class="lbl" data-i18n="continue">Продолжить</span><span class="spin"></span><span class="tick">✓</span></button>
+      </section>
+
+      <div class="foot">
+        <div class="lang" id="lang">
+          <button type="button" class="lang-btn" id="langBtn"><span id="langName">Русский (ru)</span>
+            <svg width="11" height="11" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none"/></svg></button>
+          <div class="lang-menu" id="langMenu" hidden>
+            <button type="button" data-lang="ru">Русский (ru)</button>
+            <button type="button" data-lang="en">English (en)</button>
           </div>
-          <label class="field">
-            <input type="password" name="pass" placeholder=" " autocomplete="new-password" required minlength="6">
-            <span>Пароль (от 6 символов)</span>
-            <i class="ico">🔒</i>
-            <button type="button" class="eye" aria-label="Показать пароль">👁</button>
-          </label>
-          <div class="strength"><i></i><i></i><i></i><i></i><small id="strengthTxt"></small></div>
-          <p class="err" id="regErr"></p>
-          <button class="btn primary" type="submit"><span class="lbl">Создать аккаунт</span><span class="spin"></span><span class="tick">✓</span></button>
-        </form>
-
-        <div class="foot">
-          <span>Русский (ru)</span>
-          <span>Учебный проект · 2026</span>
         </div>
       </div>
+    </div>
   </main>
 
   <div class="reveal" id="reveal"></div>
@@ -119,10 +74,10 @@
       </a>
       <button class="burger" id="burger" aria-label="Меню">☰</button>
       <nav class="nav" id="nav">
-        <a href="#catalog" data-route="catalog">Каталог</a>
-        <a href="#my" data-route="my">Мои объявления</a>
-        <a href="#loans" data-route="loans">Мои займы</a>
-        <a href="#about" data-route="about">О сервисе</a>
+        <a href="#catalog" data-route="catalog" data-i18n="navCatalog">Каталог</a>
+        <a href="#my" data-route="my" data-i18n="navMy">Мои объявления</a>
+        <a href="#loans" data-route="loans" data-i18n="navLoans">Мои займы</a>
+        <a href="#about" data-route="about" data-i18n="navAbout">О сервисе</a>
       </nav>
       <div class="top-right">
         <div class="bell-wrap">
@@ -139,10 +94,12 @@
           </button>
           <div class="dropdown user-menu" id="userMenu" hidden>
             <div class="um-head"><b id="umName"></b><small id="umRoom"></small></div>
-            <a href="#my">📦 Мои объявления</a>
-            <a href="#loans">⏰ Мои займы</a>
-            <button id="resetBtn">↺ Сбросить демо-данные</button>
-            <button id="logoutBtn" class="danger">⎋ Выйти</button>
+            <a href="#my" data-i18n="umMy">📦 Мои объявления</a>
+            <a href="#loans" data-i18n="umLoans">⏰ Мои займы</a>
+            <button id="dormBtn" data-i18n="umDorm">🏠 Сменить общежитие</button>
+            <button id="langToggle" data-i18n="umLang">🌐 English</button>
+            <button id="resetBtn" data-i18n="umReset">↺ Сбросить демо-данные</button>
+            <button id="logoutBtn" class="danger" data-i18n="umLogout">⎋ Выйти</button>
           </div>
         </div>
       </div>
@@ -154,26 +111,23 @@
   <footer class="footer">
     <div class="footer-in">
       <div class="fcol">
-        <h4>О сервисе</h4>
-        <a href="#about">Как это работает</a>
-        <a href="#about">Правила обмена</a>
-        <a href="#about">Поддержка</a>
+        <h4 data-i18n="fAbout">О сервисе</h4>
+        <a href="#about" data-i18n="fHow">Как это работает</a>
+        <a href="#about" data-i18n="fRules">Правила обмена</a>
+        <a href="#about" data-i18n="fSupport">Поддержка</a>
       </div>
       <div class="fcol">
-        <h4>Общежитие</h4>
-        <a href="#catalog" data-bld="1">Корпус 1</a>
-        <a href="#catalog" data-bld="2">Корпус 2</a>
-        <a href="#catalog" data-bld="3">Корпус 3</a>
-        <a href="#catalog" data-bld="4">Корпус 4</a>
+        <h4 data-i18n="fDorms">Общежития</h4>
+        <div class="fdorms" id="footDorms"></div>
       </div>
       <div class="fcol">
-        <h4>Разделы</h4>
-        <a href="#catalog">Каталог</a>
-        <a href="#my">Мои объявления</a>
-        <a href="#loans">Мои займы</a>
+        <h4 data-i18n="fSections">Разделы</h4>
+        <a href="#catalog" data-i18n="navCatalog">Каталог</a>
+        <a href="#my" data-i18n="navMy">Мои объявления</a>
+        <a href="#loans" data-i18n="navLoans">Мои займы</a>
       </div>
     </div>
-    <p class="fbottom">Учебный проект · Веб-сервис обмена вещами и услугами между студентами общежития · 2026</p>
+    <p class="fbottom" data-i18n="fBottom">Соседи · обмен вещами и услугами между студентами общежития · 2026</p>
   </footer>
 
   <div class="modal-bg" id="modalBg" hidden><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
@@ -181,6 +135,7 @@
 </div>
 
   <script src="js/data.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/app.js"></script>
   <script src="js/main.js"></script>

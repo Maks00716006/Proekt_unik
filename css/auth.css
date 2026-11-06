@@ -1,151 +1,149 @@
+/* ===== Экран входа и выбора общежития (всё внутри #authScreen) ===== */
 #authScreen {
   --blue: #1438f0;
   --blue-d: #0b26c2;
   --blue-l: #e8edff;
-  --teal: #7fe0dc;
-  --yellow: #ffd25e;
   --text: #1d2125;
   --muted: #6a737b;
-  --line: #dee2e6;
+  --line: #8f959e;
   --red: #e02f44;
   --green: #18a957;
-}
-
-#authScreen * { box-sizing: border-box; margin: 0; padding: 0; }
-#authScreen {
   position: relative; z-index: 0; min-height: calc(100vh - 5px);
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
-#authScreen button, #authScreen input, #authScreen select { font: inherit; }
+#authScreen * { box-sizing: border-box; margin: 0; padding: 0; }
+#authScreen button, #authScreen input { font: inherit; }
 
-/* ================= Фон: фото кампуса ================= */
+/* фон: фото кампуса, медленно приближается */
 #authScreen .bg {
   position: fixed; inset: -20px; z-index: -2;
   background: #6f9fd8 url('../assets/campus-bg.jpg') center / cover no-repeat;
   animation: kenburns 30s ease-in-out infinite alternate;
 }
-@keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.07) translate(-0.6%, -0.6%); } }
-#authScreen .bg-shade {
-  position: fixed; inset: 0; z-index: -1;
-  background:
-    radial-gradient(520px 620px at 50% 50%, rgba(255,255,255,.55), rgba(255,255,255,0) 70%),
-    linear-gradient(180deg, rgba(10,30,120,.05), rgba(10,30,120,.18));
-}
+@keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.04); } }
 
-#authScreen .auth { min-height: 100vh; display: grid; place-items: center; padding: 32px 16px; }
+#authScreen .auth { min-height: calc(100vh - 5px); display: grid; place-items: center; padding: 32px 16px; }
 
-/* ================= Карточка входа ================= */
+/* карточка */
+/* --u — «пиксель» фоновой картинки на этом экране. Карточка растёт вместе с фоном,
+   чтобы всегда закрывать место, где на исходном фото было окно входа. */
 #authScreen .card {
-  position: relative; width: 100%; max-width: 470px;
-  background: rgba(255,255,255,.86);
-  -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
-  border: 1px solid rgba(255,255,255,.7);
-  border-radius: 10px; padding: 46px 42px 22px;
-  box-shadow: 0 30px 80px -20px rgba(8, 24, 90, .45), 0 0 0 1px rgba(20,56,240,.04);
-  overflow: hidden;
+  --u: max(calc((100vw + 40px) / 1919), calc((100vh + 40px) / 870));
+  position: relative; width: min(100%, clamp(470px, calc(var(--u) * 484), 680px)); max-width: none;
+  min-height: min(calc(100vh - 40px), calc(var(--u) * 590));
+  display: flex; flex-direction: column; justify-content: center;
+  background: rgba(255,255,255,.84);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3); backdrop-filter: blur(16px) saturate(1.3);
+  border: 1px solid rgba(255,255,255,.75);
+  border-radius: 8px; padding: 56px 44px 26px;
+  box-shadow: 0 24px 70px -24px rgba(8, 24, 90, .45);
   opacity: 0; transform: translateY(30px) scale(.97);
-  transition: opacity .8s ease, transform .9s cubic-bezier(.2,.9,.3,1.1);
+  transition: opacity .8s ease, transform .9s cubic-bezier(.2,.9,.3,1.1), max-width .4s ease;
 }
 #authScreen .auth-root.loaded .card { opacity: 1; transform: none; }
-#authScreen .card-glow {
-  position: absolute; width: 380px; height: 380px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(20,56,240,.10), transparent 65%);
-  pointer-events: none; transform: translate(-50%, -50%); left: 50%; top: 0;
-  transition: left .15s, top .15s;
-}
-#authScreen .card > *:not(.card-glow) { position: relative; }
+#authScreen .card.wide { width: min(100%, clamp(560px, calc(var(--u) * 484), 680px)); }
 
-/* логотип — появляется с вращением */
-#authScreen .brand { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 8px; }
-#authScreen .brand img { width: 92px; height: 92px; border-radius: 26px; box-shadow: 0 14px 30px -10px rgba(20,56,240,.6); }
+/* логотип */
+#authScreen .brand { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 42px; }
+#authScreen .brand img { width: 96px; height: 96px; border-radius: 26px; box-shadow: 0 14px 30px -10px rgba(20,56,240,.6); }
 #authScreen .auth-root.loaded .brand img { animation: logoIn 1s cubic-bezier(.2,.9,.3,1.3) .2s both; }
 @keyframes logoIn { from { opacity: 0; transform: rotate(-200deg) scale(.4); } }
-#authScreen .brand b { display: block; font-size: 38px; font-weight: 800; letter-spacing: .5px; color: #3a4049; line-height: 1; }
+#authScreen .brand b { display: block; font-size: 40px; font-weight: 800; letter-spacing: .5px; color: #3a4049; line-height: 1; }
 #authScreen .brand small { display: block; font-size: 16px; font-weight: 600; letter-spacing: 1.2px; color: #3a4049; text-transform: uppercase; margin-top: 6px; }
 #authScreen .auth-root.loaded .brand div { animation: slideIn .8s ease .45s both; }
 @keyframes slideIn { from { opacity: 0; transform: translateX(-16px); } }
 
-#authScreen .tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; margin: 26px 0 20px; background: rgba(225,230,242,.8); border-radius: 12px; padding: 4px; }
-#authScreen .tab { position: relative; z-index: 1; border: 0; background: none; padding: 10px; border-radius: 9px; cursor: pointer; font-weight: 600; color: var(--muted); transition: color .25s; }
-#authScreen .tab.active { color: var(--blue); }
-#authScreen .tab-ind { position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: #fff; border-radius: 9px; box-shadow: 0 2px 8px rgba(0,0,0,.08); transition: transform .35s cubic-bezier(.3,1.2,.4,1); }
-#authScreen .tabs.reg .tab-ind { transform: translateX(100%); }
+/* шаги (вход → общежитие) */
+#authScreen .step { animation: stepIn .45s ease both; }
+#authScreen .step[hidden] { display: none; }
+@keyframes stepIn { from { opacity: 0; transform: translateX(24px); } }
 
-#authScreen .form { display: grid; gap: 14px; animation: formIn .4s ease; }
-#authScreen .form.hidden { display: none; }
-@keyframes formIn { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
-
-#authScreen .field { position: relative; display: block; }
-#authScreen .field input, #authScreen .field select {
-  width: 100%; height: 54px; border: 1.5px solid var(--line); border-radius: 12px;
-  padding: 20px 44px 6px 44px; font-size: 15px; outline: none; background: #fff;
+/* поля — как на портале университета */
+#authScreen .form { display: grid; gap: 14px; }
+#authScreen .inp {
+  width: 100%; height: 44px; border: 1px solid var(--line); border-radius: 8px;
+  padding: 0 14px; font-size: 16px; color: var(--text); background: #fff; outline: none;
   transition: border-color .2s, box-shadow .2s;
 }
-#authScreen .field select { padding: 0 14px 0 44px; appearance: none; cursor: pointer;
-  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236a737b' stroke-width='1.8' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center; }
-#authScreen .field span {
-  position: absolute; left: 44px; top: 17px; color: var(--muted); font-size: 15px;
-  pointer-events: none; transition: all .18s ease;
-}
-#authScreen .field input:focus, #authScreen .field select:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(20,56,240,.12); }
-#authScreen .field input:focus + span, #authScreen .field input:not(:placeholder-shown) + span { top: 7px; font-size: 11.5px; color: var(--blue); font-weight: 600; }
-#authScreen .field .ico { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-style: normal; font-size: 16px; filter: grayscale(.2); }
-#authScreen .field .eye { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); border: 0; background: none; cursor: pointer; font-size: 16px; padding: 8px; border-radius: 8px; opacity: .55; }
-#authScreen .field .eye:hover { opacity: 1; background: #f1f3f8; }
-#authScreen .field.bad input { border-color: var(--red); animation: shake .4s; }
+#authScreen .inp::placeholder { color: #6c7178; }
+#authScreen .inp:focus { border-color: #8fa3ff; box-shadow: 0 0 0 4px rgba(20,56,240,.18); }
+#authScreen .inp.bad { border-color: var(--red); animation: shake .4s; }
 @keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
 
-#authScreen .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-#authScreen .row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-#authScreen .check { display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--muted); }
-#authScreen .check input { display: none; }
-#authScreen .check i { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid #c5cad3; display: grid; place-items: center; transition: .2s; }
-#authScreen .check input:checked + i { background: var(--blue); border-color: var(--blue); }
-#authScreen .check input:checked + i::after { content: '✓'; color: #fff; font-size: 12px; font-style: normal; }
-#authScreen .link { color: var(--blue); text-decoration: none; font-weight: 500; }
-#authScreen .link:hover { text-decoration: underline; }
-
-#authScreen .err { color: var(--red); font-size: 13.5px; min-height: 0; }
+#authScreen .err { color: var(--red); font-size: 14px; }
 #authScreen .err:empty { display: none; }
 
 #authScreen .btn {
-  position: relative; height: 52px; border-radius: 12px; border: 0; cursor: pointer;
-  font-weight: 700; font-size: 15.5px; overflow: hidden;
-  transition: transform .15s, box-shadow .2s, background .2s, width .3s;
+  position: relative; height: 46px; border-radius: 8px; border: 0; cursor: pointer;
+  font-weight: 600; font-size: 16px; overflow: hidden; background: var(--blue); color: #fff;
+  box-shadow: 0 10px 22px -10px rgba(20,56,240,.8);
+  transition: transform .15s, background .2s, opacity .2s;
 }
+#authScreen .btn:hover { background: var(--blue-d); }
 #authScreen .btn:active { transform: scale(.98); }
-#authScreen .btn.primary { background: var(--blue); color: #fff; box-shadow: 0 10px 22px -8px rgba(20,56,240,.7); }
-#authScreen .btn.primary:hover { background: var(--blue-d); box-shadow: 0 14px 28px -8px rgba(20,56,240,.8); }
-#authScreen .btn.ghost { background: #fff; color: var(--blue); border: 1.5px solid #cfd8ff; }
-#authScreen .btn.ghost:hover { background: var(--blue-l); }
+#authScreen .btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
 #authScreen .btn .spin, #authScreen .btn .tick { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; transition: opacity .2s; }
 #authScreen .btn .spin::before { content: ''; width: 22px; height: 22px; border-radius: 50%; border: 3px solid rgba(255,255,255,.35); border-top-color: #fff; animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 #authScreen .btn .tick { font-size: 22px; }
 #authScreen .btn.loading .lbl { opacity: 0; }
 #authScreen .btn.loading .spin { opacity: 1; }
-#authScreen .btn.done { background: var(--green) !important; }
+#authScreen .btn.done { background: var(--green); }
 #authScreen .btn.done .lbl, #authScreen .btn.done .spin { opacity: 0; }
 #authScreen .btn.done .tick { opacity: 1; animation: pop .4s cubic-bezier(.2,.9,.3,1.5); }
 @keyframes pop { from { transform: scale(.3); } to { transform: scale(1); } }
 #authScreen .ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,.45); transform: scale(0); animation: ripple .6s ease-out; pointer-events: none; }
-#authScreen .btn.ghost .ripple { background: rgba(20,56,240,.18); }
 @keyframes ripple { to { transform: scale(4); opacity: 0; } }
 
-#authScreen .divider { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 13px; }
-#authScreen .divider::before, #authScreen .divider::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+#authScreen .link { color: var(--blue); text-decoration: none; font-size: 15px; justify-self: start; }
+#authScreen .link:hover { text-decoration: underline; }
 
-#authScreen .strength { display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: 6px; align-items: center; margin-top: -4px; }
-#authScreen .strength i { height: 5px; border-radius: 3px; background: #e6e9ef; transition: background .3s; }
-#authScreen .strength small { font-size: 12px; color: var(--muted); min-width: 64px; text-align: right; }
+/* выбор общежития */
+#authScreen .step-title { font-size: 22px; font-weight: 700; text-align: center; }
+#authScreen .step-sub { color: var(--muted); text-align: center; margin: 6px 0 20px; font-size: 15px; }
+#authScreen .dorm-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
 
-#authScreen .foot { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: 22px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,.08); }
-#authScreen .foot span:first-child { color: var(--blue); }
+/* общий вид радио-кнопок общежитий (используется и в приложении) */
+:is(#authScreen, #appScreen) .dorm {
+  position: relative; display: flex; align-items: center; gap: 12px; cursor: pointer;
+  padding: 13px 14px; border: 1.5px solid #d5d9e0; border-radius: 10px; background: #fff;
+  transition: border-color .2s, background .2s, box-shadow .2s, transform .15s;
+  animation: dormIn .4s ease both; user-select: none; text-align: left;
+}
+@keyframes dormIn { from { opacity: 0; transform: translateY(8px); } }
+:is(#authScreen, #appScreen) .dorm:hover { border-color: #9fb0ff; transform: translateY(-1px); }
+:is(#authScreen, #appScreen) .dorm input { position: absolute; opacity: 0; pointer-events: none; }
+:is(#authScreen, #appScreen) .dorm .radio {
+  flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid #aab1bc; background: #fff;
+  display: grid; place-items: center; transition: border-color .2s, box-shadow .2s;
+}
+:is(#authScreen, #appScreen) .dorm .radio::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: #1438f0; transform: scale(0); transition: transform .25s cubic-bezier(.2,.9,.3,1.6); }
+:is(#authScreen, #appScreen) .dorm b { display: block; font-size: 15px; font-weight: 600; color: #1d2125; }
+:is(#authScreen, #appScreen) .dorm small { display: block; font-size: 12.5px; color: #6a737b; margin-top: 1px; }
+:is(#authScreen, #appScreen) .dorm.on { border-color: #1438f0; background: #eef2ff; box-shadow: 0 0 0 4px rgba(20,56,240,.12); }
+:is(#authScreen, #appScreen) .dorm.on .radio { border-color: #1438f0; box-shadow: 0 0 0 4px rgba(20,56,240,.15); }
+:is(#authScreen, #appScreen) .dorm.on .radio::after { transform: scale(1); }
+:is(#authScreen, #appScreen) .dorm input:focus-visible + .radio { outline: 2px solid #1438f0; outline-offset: 2px; }
 
-/* переход в приложение: синий круг расширяется на весь экран */
+/* низ карточки: язык */
+#authScreen .foot { display: flex; align-items: center; margin-top: 30px; padding-top: 18px; border-top: 1px solid rgba(0,0,0,.1); }
+#authScreen .lang { position: relative; }
+#authScreen .lang-btn { background: none; border: 0; color: var(--blue); cursor: pointer; font-size: 15px; display: flex; align-items: center; gap: 6px; padding: 4px 0; }
+#authScreen .lang-btn svg { transition: transform .2s; }
+#authScreen .lang.open .lang-btn svg { transform: rotate(180deg); }
+#authScreen .lang-menu {
+  position: absolute; left: 0; bottom: calc(100% + 8px); min-width: 180px; background: #fff;
+  border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 12px 30px rgba(0,0,0,.15); padding: 4px;
+  animation: dd .18s ease;
+}
+@keyframes dd { from { opacity: 0; transform: translateY(6px); } }
+#authScreen .lang-menu button { display: flex; justify-content: space-between; width: 100%; border: 0; background: none; padding: 9px 12px; border-radius: 6px; cursor: pointer; font-size: 14.5px; text-align: left; }
+#authScreen .lang-menu button:hover { background: #f1f3f8; }
+#authScreen .lang-menu button.on { color: var(--blue); font-weight: 600; }
+
+/* переход в приложение: синий круг на весь экран */
 #authScreen .reveal {
   position: fixed; z-index: 50; width: 40px; height: 40px; border-radius: 50%;
   background: var(--blue); transform: translate(-50%, -50%) scale(0); pointer-events: none;
@@ -154,19 +152,19 @@
 
 #authScreen .toast {
   position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 120px);
-  background: #1d2125; color: #fff; padding: 12px 18px; border-radius: 12px; font-size: 14px;
+  background: #1d2125; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 14px;
   transition: transform .35s cubic-bezier(.2,.9,.3,1.2); z-index: 60; max-width: calc(100% - 32px);
 }
 #authScreen .toast.show { transform: translate(-50%, 0); }
 
-/* ================= Адаптив ================= */
-#authScreen @media (max-width: 520px) {
-  .card { padding: 34px 22px 18px; }
-  .brand img { width: 64px; height: 64px; border-radius: 18px; }
-  .brand b { font-size: 28px; }
-  .brand small { font-size: 12px; }
-  .two { grid-template-columns: 1fr; }
-  .row { flex-wrap: wrap; gap: 10px; }
+@media (max-width: 520px) {
+  #authScreen .card { padding: 38px 22px 20px; }
+  #authScreen .brand { margin-bottom: 30px; }
+  #authScreen .brand img { width: 64px; height: 64px; border-radius: 18px; }
+  #authScreen .brand b { font-size: 28px; }
+  #authScreen .brand small { font-size: 12px; }
+  #authScreen .dorm-list { grid-template-columns: 1fr; }
+  #authScreen .inp { font-size: 14.5px; padding: 0 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
   #authScreen *, #authScreen *::before, #authScreen *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
