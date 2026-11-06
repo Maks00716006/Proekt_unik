@@ -346,6 +346,20 @@ body, #appScreen .card, #appScreen .group, #appScreen .ctl, #appScreen .btn, #ap
 @media (max-width: 600px) { #appScreen .hero-btn { align-self: center; } #appScreen .tile b { font-size: 24px; } }
 #appScreen .about-hero p + p { margin-top: 12px; }
 
+/* Telegram и окно контакта */
+#appScreen .tg-btn { background: #229ed9; border-color: #229ed9; color: #fff; text-decoration: none; font-weight: 600; }
+#appScreen .tg-btn:hover { background: #1b8bc0; }
+#appScreen .tg-btn.big { display: flex; width: 100%; height: 46px; font-size: 15.5px; margin-bottom: 12px; }
+#appScreen .contact { text-align: center; }
+#appScreen .contact .owner { text-align: left; margin-top: 16px; }
+#appScreen .contact h3 { margin-top: 6px; }
+#appScreen .ok-mark { width: 56px; height: 56px; margin: 0 auto; border-radius: 50%; background: #e3f6ec; color: var(--green); font-size: 28px; font-weight: 800; display: grid; place-items: center; animation: pop .4s cubic-bezier(.2,.9,.3,1.5); }
+@keyframes pop { from { transform: scale(.3); } }
+#appScreen .msg-box { text-align: left; background: var(--panel); border: 1px dashed var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 4px; }
+#appScreen .msg-box small { color: var(--muted); font-size: 12px; }
+#appScreen .msg-box p { margin-top: 4px; font-size: 14px; line-height: 1.45; }
+:root[data-theme="dark"] #appScreen .ok-mark { background: #143524; }
+
 </style>
   <style>
 /* ===== Экран входа и выбора общежития (всё внутри #authScreen) ===== */
@@ -587,7 +601,7 @@ body, #appScreen .card, #appScreen .group, #appScreen .ctl, #appScreen .btn, #ap
       <nav class="nav" id="nav">
         <a href="#catalog" data-route="catalog" data-i18n="navCatalog">Каталог</a>
         <a href="#my" data-route="my" data-i18n="navMy">Мои объявления</a>
-        <a href="#loans" data-route="loans" data-i18n="navLoans">Мои займы</a>
+        <a href="#loans" data-route="loans" data-i18n="navLoans">Мои обмены</a>
         <a href="#profile" data-route="profile" data-i18n="navProfile">Профиль</a>
         <a href="#about" data-route="about" data-i18n="navAbout">О сервисе</a>
       </nav>
@@ -609,7 +623,7 @@ body, #appScreen .card, #appScreen .group, #appScreen .ctl, #appScreen .btn, #ap
             <div class="um-head"><b id="umName"></b><small id="umRoom"></small></div>
             <a href="#profile" data-i18n="umProfile">👤 Профиль и достижения</a>
             <a href="#my" data-i18n="umMy">📦 Мои объявления</a>
-            <a href="#loans" data-i18n="umLoans">⏰ Мои займы</a>
+            <a href="#loans" data-i18n="umLoans">⏰ Мои обмены</a>
             <button id="dormBtn" data-i18n="umDorm">🏠 Сменить общежитие</button>
             <button id="langToggle" data-i18n="umLang">🌐 English</button>
             <button id="fillBtn" data-i18n="umFill">🧪 Заполнить примерами</button>
@@ -639,7 +653,7 @@ body, #appScreen .card, #appScreen .group, #appScreen .ctl, #appScreen .btn, #ap
         <h4 data-i18n="fSections">Разделы</h4>
         <a href="#catalog" data-i18n="navCatalog">Каталог</a>
         <a href="#my" data-i18n="navMy">Мои объявления</a>
-        <a href="#loans" data-i18n="navLoans">Мои займы</a>
+        <a href="#loans" data-i18n="navLoans">Мои обмены</a>
       </div>
     </div>
     <p class="fbottom" data-i18n="fBottom">Соседи · обмен вещами и услугами между студентами общежития · 2026</p>
@@ -658,16 +672,16 @@ body, #appScreen .card, #appScreen .group, #appScreen .ctl, #appScreen .btn, #ap
 const MEM = {};
 const DB = {
   get(key, def) {
-    try { const v = localStorage.getItem('sosedi3_' + key); if (v !== null) return JSON.parse(v); } catch (e) {}
+    try { const v = localStorage.getItem('sosedi4_' + key); if (v !== null) return JSON.parse(v); } catch (e) {}
     return key in MEM ? JSON.parse(MEM[key]) : def;
   },
   set(key, val) {
     MEM[key] = JSON.stringify(val);
-    try { localStorage.setItem('sosedi3_' + key, MEM[key]); } catch (e) {}
+    try { localStorage.setItem('sosedi4_' + key, MEM[key]); } catch (e) {}
   },
   del(key) {
     delete MEM[key];
-    try { localStorage.removeItem('sosedi3_' + key); } catch (e) {}
+    try { localStorage.removeItem('sosedi4_' + key); } catch (e) {}
   }
 };
 
@@ -795,7 +809,7 @@ function getUsers() {
 function saveUsers(u) { DB.set('users', u); }
 function currentUser() {
   let email = DB.get('session', null);
-  if (!email) { try { email = JSON.parse(sessionStorage.getItem('sosedi3_session')); } catch (e) {} }
+  if (!email) { try { email = JSON.parse(sessionStorage.getItem('sosedi4_session')); } catch (e) {} }
   if (!email) email = MEM.tabSession || null;
   if (!email) return null;
   return getUsers().find(u => u.email === email) || null;
@@ -803,18 +817,18 @@ function currentUser() {
 function login(email, remember) {
   MEM.tabSession = email;
   if (remember) DB.set('session', email);
-  else { DB.del('session'); try { sessionStorage.setItem('sosedi3_session', JSON.stringify(email)); } catch (e) {} }
+  else { DB.del('session'); try { sessionStorage.setItem('sosedi4_session', JSON.stringify(email)); } catch (e) {} }
 }
 function logout() {
   delete MEM.tabSession;
   DB.del('session');
-  try { sessionStorage.removeItem('sosedi3_session'); } catch (e) {}
+  try { sessionStorage.removeItem('sosedi4_session'); } catch (e) {}
 }
 
 /* ===== объявления ===== */
-/* примеры объявлений; me — пользователь, для которого создаются займы */
+/* примеры объявлений; me — пользователь, для которого создаются обмены */
 function seedItems(me = DEMO_USER) {
-  const N = (name, bld, room, tg) => ({ ownerName: name, owner: tg + '@n', bld: DORM_BY_TG[tg] || 'm1', room, tg });
+  const N = (name, bld, room, tg) => ({ ownerName: name, owner: tg + '@n', bld: DORM_BY_TG[tg] || 'm1', room, tg: tg + '_demo' });
   let id = 1;
   const mk = (o) => Object.assign({
     id: 'i' + (id++), status: 'free', uses: 0, created: iso(addDays(-id)), rating: null, reviews: 0
@@ -882,13 +896,55 @@ function seedItems(me = DEMO_USER) {
   ];
 }
 
-/* примеры объявлений выключены — каталог пустой, пока студенты не выложат свои */
-const SEED_DEMO_LISTINGS = false;
+/* объявления, которые видны в каталоге с самого начала (все свободны — их можно взять) */
+function defaultListings() {
+  const L = (n, o) => Object.assign({
+    id: 'd' + n, status: 'free', uses: 0, rating: null, reviews: 0, created: iso(addDays(-n))
+  }, o, { owner: o.tg + '@demo' });
+  return [
+    L(1, { type: 'thing', title: 'Электродрель с набором свёрл', cat: 'Инструменты', emoji: '🔧', uses: 14,
+      desc: 'Подойдёт, чтобы повесить полку или карниз. Свёрла по дереву и бетону в комплекте.',
+      ownerName: 'Иван Морозов', bld: 'm2', room: '214', tg: '@ivan_morozov_demo' }),
+    L(2, { type: 'service', title: 'Приготовлю домашний суп', cat: 'Другое', emoji: '🍲', uses: 9, rating: 4.9, reviews: 8,
+      desc: 'Борщ, куриный или грибной суп на 3–4 порции. Продукты ваши — или скинемся вместе.',
+      ownerName: 'Мария Соколова', bld: 'm1', room: '305', tg: '@masha_sokolova_demo' }),
+    L(3, { type: 'thing', title: 'Ножницы портновские', cat: 'Инструменты', emoji: '✂️', uses: 6,
+      desc: 'Острые, большие — для ткани, картона и любых поделок.',
+      ownerName: 'Анна Кузнецова', bld: 'g1', room: '118', tg: '@anna_kuznetsova_demo' }),
+    L(4, { type: 'thing', title: 'Портативная колонка', cat: 'Бытовая техника', emoji: '🔊', uses: 11,
+      desc: 'Bluetooth, держит заряд около 10 часов. Для праздника на этаже или тренировки.',
+      ownerName: 'Дмитрий Орлов', bld: 'dsg', room: '512', tg: '@dima_orlov_demo' }),
+    L(5, { type: 'thing', title: 'Утюг с отпаривателем', cat: 'Бытовая техника', emoji: '👔', uses: 23,
+      desc: 'Вертикальное отпаривание — удобно перед защитой или собеседованием.',
+      ownerName: 'Елена Попова', bld: 'm3', room: '401', tg: '@lena_popova_demo' }),
+    L(6, { type: 'service', title: 'Починю ноутбук, установлю Windows', cat: 'Ремонт техники', emoji: '💻', uses: 17, rating: 4.8, reviews: 15,
+      desc: 'Чистка от пыли, замена термопасты, установка системы и программ.',
+      ownerName: 'Артём Волков', bld: 'g2', room: '220', tg: '@artem_volkov_demo' }),
+    L(7, { type: 'service', title: 'Помогу с английским языком', cat: 'Помощь с учёбой', emoji: '🇬🇧', uses: 7, rating: 5.0, reviews: 6,
+      desc: 'Разговорная практика и подготовка к экзамену, уровень C1.',
+      ownerName: 'Софья Лебедева', bld: 'm4', room: '109', tg: '@sofia_lebedeva_demo' }),
+    L(8, { type: 'thing', title: 'Настольная игра «Мафия»', cat: 'Игры', emoji: '🎲', uses: 12,
+      desc: 'Карты и маски на 12 человек — для вечера с соседями.',
+      ownerName: 'Никита Смирнов', bld: 'dk', room: '33', tg: '@nikita_smirnov_demo' }),
+    L(9, { type: 'thing', title: 'Фен для волос', cat: 'Бытовая техника', emoji: '💨', uses: 8,
+      desc: '2000 Вт, три режима и насадка-концентратор.',
+      ownerName: 'Полина Зайцева', bld: 'm2', room: '318', tg: '@polina_zaitseva_demo' }),
+    L(10, { type: 'thing', title: 'Стремянка 5 ступеней', cat: 'Инструменты', emoji: '🪜', uses: 15,
+      desc: 'Алюминиевая и лёгкая: поменять лампочку или повесить шторы.',
+      ownerName: 'Кирилл Новиков', bld: 'g1', room: '407', tg: '@kirill_novikov_demo' }),
+    L(11, { type: 'service', title: 'Мужские стрижки машинкой', cat: 'Красота', emoji: '💈', uses: 21, rating: 4.7, reviews: 18,
+      desc: 'Своя машинка и насадки, всё чисто. Около 20 минут.',
+      ownerName: 'Тимур Ахметов', bld: 'dsg', room: '615', tg: '@timur_akhmetov_demo' }),
+    L(12, { type: 'thing', title: 'Мультиварка', cat: 'Кухня', emoji: '🍳', uses: 10,
+      desc: 'Каша, плов, тушёные овощи — приготовится, пока вы на парах.',
+      ownerName: 'Алина Фёдорова', bld: 'm1', room: '212', tg: '@alina_fedorova_demo' })
+  ];
+}
 
 function getItems() {
   const items = DB.get('items', null);
   if (items) return items;
-  const seeded = SEED_DEMO_LISTINGS ? seedItems() : [];
+  const seeded = defaultListings();
   DB.set('items', seeded);
   return seeded;
 }
@@ -914,8 +970,8 @@ const I18N = {
     dormSub: 'Покажем вещи и услуги соседей рядом с вами',
     continue: 'Продолжить',
 
-    navCatalog: 'Каталог', navMy: 'Мои объявления', navLoans: 'Мои займы', navAbout: 'О сервисе', navProfile: 'Профиль', umProfile: '👤 Профиль',
-    umMy: '📦 Мои объявления', umLoans: '⏰ Мои займы', umDorm: '🏠 Сменить общежитие',
+    navCatalog: 'Каталог', navMy: 'Мои объявления', navLoans: 'Мои обмены', navAbout: 'О сервисе', navProfile: 'Профиль', umProfile: '👤 Профиль',
+    umMy: '📦 Мои объявления', umLoans: '⏰ Мои обмены', umDorm: '🏠 Сменить общежитие',
     umLang: '🌐 English', umFill: '🧪 Заполнить примерами', umReset: '🗑 Очистить объявления', umLogout: '⎋ Выйти',
     fAbout: 'О сервисе', fHow: 'Как это работает', fRules: 'Правила обмена', fSupport: 'Поддержка',
     fDorms: 'Общежития', fSections: 'Разделы',
@@ -929,7 +985,7 @@ const I18N = {
     apply: 'Применить', reset: 'Сбросить', freeOf: 'свободно', nowFree: 'Сейчас доступно',
     myDorm: 'Моё общежитие', room: 'комн.', mine: 'Моё',
     available: 'Свободна', taken: 'Занята', canTake: 'можно взять', until: 'до', overdue: 'просрочено',
-    myAds: 'Мои объявления', myLoans: 'Мои займы', aboutTitle: 'Сервис обмена вещами и услугами между студентами общежитий',
+    myAds: 'Мои объявления', myLoans: 'Мои обмены', aboutTitle: 'Сервис обмена вещами и услугами между студентами общежитий',
     changeDorm: 'Сменить общежитие', save: 'Сохранить', dormSaved: 'Общежитие сохранено',
     hello: 'Здравствуйте', welcome: 'Добро пожаловать в «МИСИС Соседи»',
     emptyTitle: 'Пока объявлений нет', emptyText: 'Разместите вещь или предложите услугу — объявление увидят жители общежитий.',
@@ -949,8 +1005,8 @@ const I18N = {
     dormSub: 'We will show items and services from neighbours nearby',
     continue: 'Continue',
 
-    navCatalog: 'Catalogue', navMy: 'My listings', navLoans: 'My loans', navAbout: 'About', navProfile: 'Profile', umProfile: '👤 Profile',
-    umMy: '📦 My listings', umLoans: '⏰ My loans', umDorm: '🏠 Change dormitory',
+    navCatalog: 'Catalogue', navMy: 'My listings', navLoans: 'My exchanges', navAbout: 'About', navProfile: 'Profile', umProfile: '👤 Profile',
+    umMy: '📦 My listings', umLoans: '⏰ My exchanges', umDorm: '🏠 Change dormitory',
     umLang: '🌐 Русский', umFill: '🧪 Fill with examples', umReset: '🗑 Clear listings', umLogout: '⎋ Log out',
     fAbout: 'About', fHow: 'How it works', fRules: 'Sharing rules', fSupport: 'Support',
     fDorms: 'Dormitories', fSections: 'Sections',
@@ -964,7 +1020,7 @@ const I18N = {
     apply: 'Apply', reset: 'Reset', freeOf: 'available', nowFree: 'Available now',
     myDorm: 'My dorm', room: 'room', mine: 'Mine',
     available: 'Available', taken: 'Taken', canTake: 'can borrow', until: 'until', overdue: 'overdue',
-    myAds: 'My listings', myLoans: 'My loans', aboutTitle: 'Sharing items and services between dorm students',
+    myAds: 'My listings', myLoans: 'My exchanges', aboutTitle: 'Sharing items and services between dorm students',
     changeDorm: 'Change dormitory', save: 'Save', dormSaved: 'Dormitory saved',
     hello: 'Hi', welcome: 'Welcome to MISIS Sosedi',
     emptyTitle: 'No listings yet', emptyText: 'Post an item or offer a service — your neighbours will see it first.',
@@ -1166,19 +1222,19 @@ document.addEventListener('click', e => {
 });
 $('#burger').addEventListener('click', () => $('#nav').classList.toggle('open'));
 $('#logoutBtn').addEventListener('click', () => { logout(); location.hash = ''; location.reload(); });
-/* тестовые данные: примеры объявлений и займов для текущего пользователя */
+/* тестовые данные: примеры объявлений и обменов для текущего пользователя */
 $('#fillBtn').addEventListener('click', () => {
   $$('.dropdown').forEach(d => d.hidden = true);
   const own = items.filter(i => i.owner === ME.email && !i.id.startsWith('i'));
   const others = items.filter(i => i.owner !== ME.email && !i.id.startsWith('i'));
   items = [...own, ...others, ...seedItems({ email: ME.email, name: ME.name, bld: ME.bld, room: ME.room, tg: ME.tg })];
   persist(); route();
-  toast('✓', 'Примеры добавлены', ' Займы и напоминания доступны в разделе «Мои займы»');
+  toast('✓', 'Примеры добавлены', ' Обмены и напоминания доступны в разделе «Мои обмены»');
   updateBell();
 });
 $('#resetBtn').addEventListener('click', () => {
   $$('.dropdown').forEach(d => d.hidden = true);
-  if (!confirm('Удалить все объявления и займы? Это действие нельзя отменить.')) return;
+  if (!confirm('Удалить все объявления и обмены? Это действие нельзя отменить.')) return;
   items = []; persist(); route();
   toast('✓', 'Объявления удалены');
 });
@@ -1549,8 +1605,8 @@ function pageAbout() {
     <h2 class="sec">Порядок работы</h2>
     <div class="steps">
       <div class="step"><div class="n">1</div><b>Поиск</b><p>Найдите вещь или услугу в каталоге, используя фильтры по общежитию и категории.</p></div>
-      <div class="step"><div class="n">2</div><b>Оформление</b><p>Укажите срок возврата и свяжитесь с владельцем по контактам из карточки.</p></div>
-      <div class="step"><div class="n">3</div><b>Пользование</b><p>Срок займа отображается в разделе «Мои займы»; напоминание можно добавить в календарь.</p></div>
+      <div class="step"><div class="n">2</div><b>Договорённость</b><p>Укажите срок возврата — сервис покажет Telegram владельца, чтобы договориться о передаче.</p></div>
+      <div class="step"><div class="n">3</div><b>Пользование</b><p>Срок пользования отображается в разделе «Мои обмены»; напоминание можно добавить в календарь.</p></div>
       <div class="step"><div class="n">4</div><b>Возврат</b><p>Сервис напомнит о возврате заранее и уведомит владельца о просрочке. После возврата оцените обмен.</p></div>
     </div>
     <h2 class="sec">Правила обмена</h2>
@@ -1594,7 +1650,7 @@ function openItem(id) {
           <div class="quick">${[1, 2, 3, 7, 14].map(d => `<button type="button" data-d="${d}" class="${d === 3 ? 'on' : ''}">${d} ${plural(d, 'день', 'дня', 'дней')}</button>`).join('')}</div></label>
         <label><span>Дата возврата</span><input class="ctl" type="date" name="to" value="${iso(addDays(3))}" min="${iso(addDays(1))}" max="${iso(addDays(30))}" required></label>
         <p class="meta">Напоминание придёт за день до срока и в день возврата.</p>
-        <div class="m-actions"><button type="button" class="btn m-cancel">Отмена</button><button class="btn primary">Оформить займ</button></div>
+        <div class="m-actions"><button type="button" class="btn m-cancel">Отмена</button><button class="btn primary">Взять на время</button></div>
       </form>`;
   } else if (iBorrow) {
     const p = loanProgress(it);
@@ -1620,7 +1676,8 @@ function openItem(id) {
       <p class="desc">${esc(it.desc)}</p>
       <div class="owner">
         <span class="avatar">${initials(it.ownerName)}</span>
-        <div style="flex:1"><b>${mine ? 'Ты' : esc(it.ownerName)}</b><small>${esc(dormName(it.bld))}${it.room ? ', комната ' + esc(it.room) : ''}${it.tg ? ' · ' + esc(it.tg) : ''}</small></div>
+        <div style="flex:1"><b>${mine ? 'Ты' : esc(it.ownerName)}</b><small>${esc(dormName(it.bld))}${it.room ? ', комната ' + esc(it.room) : ''}</small></div>
+        ${it.tg && !mine ? `<a class="btn tg-btn sm" href="${tgUrl(it.tg)}" target="_blank" rel="noopener">${TG_ICON} Написать</a>` : ''}
       </div>
       ${action}
     </div>`);
@@ -1640,15 +1697,14 @@ function openItem(id) {
     e.preventDefault();
     if (it.type === 'service') {
       it.uses++; logEvent({ type: 'service', who: ME.email, owner: it.owner, item: it.title });
-      persist(); closeModal();
-      toast('📨', 'Заявка отправлена', ` Исполнитель (${it.ownerName}) свяжется с вами${it.tg ? ': ' + it.tg : ''}.`);
+      persist(); closeModal(); showContact(it, 'service');
     } else {
       const to = f.to.value;
       if (!to || daysUntil(to) < 1) { toast('!', 'Дата возврата должна быть не раньше завтрашнего дня'); return; }
       Object.assign(it, { status: 'busy', borrower: ME.email, borrowerName: ME.name, from: iso(today()), to });
       it.uses++; logEvent({ type: 'borrow', who: ME.email, owner: it.owner, item: it.title });
       persist(); closeModal(); route();
-      toast('✓', 'Займ оформлен до ' + fmtDate(to), ` Владелец: ${it.ownerName}, ${dormName(it.bld)}${it.room ? ', комн. ' + it.room : ''}.`);
+      showContact(it, 'thing');
     }
   });
 }
@@ -1732,6 +1788,45 @@ function deleteItem(id) {
   toast('✓', 'Объявление удалено');
 }
 
+
+
+/* ---------- контакт владельца после «Взять на время» / заявки на услугу ---------- */
+const TG_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3 18.7 19.4c-.2 1-.9 1.3-1.7.8l-4.8-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.9 8.9-8c.4-.3-.1-.5-.6-.2L6.5 13.2l-4.7-1.5c-1-.3-1-1 .2-1.5l18.4-7.1c.9-.3 1.6.2 1.5 1.2z"/></svg>';
+function longDate(isoStr) { return parseIso(isoStr).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }); }
+function tgUrl(tg) { return 'https://t.me/' + encodeURIComponent(String(tg).replace(/^@/, '')); }
+
+function showContact(it, kind) {
+  const first = it.ownerName.split(' ')[0];
+  const msg = kind === 'thing'
+    ? `Здравствуйте! Хочу взять «${it.title}» через «МИСИС Соседи» до ${longDate(it.to)}. Когда удобно забрать?`
+    : `Здравствуйте! Пишу по объявлению «${it.title}» в «МИСИС Соседи».`;
+  openModal(`
+    <div class="m-body contact">
+      <div class="ok-mark">✓</div>
+      <h3>${kind === 'thing' ? 'Вещь закреплена за вами' : 'Заявка отправлена'}</h3>
+      <p class="meta">${kind === 'thing'
+        ? `до <b>${longDate(it.to)}</b>. Напишите владельцу, чтобы договориться, когда и где забрать вещь.`
+        : `Напишите исполнителю, чтобы договориться о времени.`}</p>
+      <div class="owner">
+        <span class="avatar">${initials(it.ownerName)}</span>
+        <div style="flex:1"><b>${esc(it.ownerName)}</b><small>${esc(dormName(it.bld))}${it.room ? ', комната ' + esc(it.room) : ''}</small></div>
+      </div>
+      ${it.tg ? `
+        <a class="btn tg-btn big" href="${tgUrl(it.tg)}" target="_blank" rel="noopener">${TG_ICON} Написать в Telegram ${esc(it.tg)}</a>
+        <div class="msg-box"><small>Готовое сообщение</small><p id="msgText">${esc(msg)}</p></div>
+        <div class="m-actions" style="justify-content:space-between">
+          <button class="btn" id="copyMsg">📋 Скопировать сообщение</button>
+          <div style="display:flex;gap:8px">${kind === 'thing' ? '<button class="btn" id="cIcs">📅 В календарь</button>' : ''}<button class="btn primary m-cancel">Готово</button></div>
+        </div>`
+      : `<p class="meta">Владелец не указал Telegram — найдите его по адресу: ${esc(dormName(it.bld))}${it.room ? ', комната ' + esc(it.room) : ''}.</p>
+        <div class="m-actions"><button class="btn primary m-cancel">Готово</button></div>`}
+    </div>`);
+  $('.m-cancel').addEventListener('click', closeModal);
+  $('#cIcs')?.addEventListener('click', () => downloadIcs(it.id));
+  $('#copyMsg')?.addEventListener('click', () => {
+    navigator.clipboard?.writeText(msg).then(() => toast('✓', 'Сообщение скопировано', ' Вставьте его в чат с ' + first)).catch(() => toast('!', 'Не удалось скопировать'));
+  });
+}
 
 /* ================= Дополнительно: статистика, достижения, оценки, календарь, тема ================= */
 function getLog() { return DB.get('log', []); }

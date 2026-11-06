@@ -6,16 +6,16 @@
 const MEM = {};
 const DB = {
   get(key, def) {
-    try { const v = localStorage.getItem('sosedi3_' + key); if (v !== null) return JSON.parse(v); } catch (e) {}
+    try { const v = localStorage.getItem('sosedi4_' + key); if (v !== null) return JSON.parse(v); } catch (e) {}
     return key in MEM ? JSON.parse(MEM[key]) : def;
   },
   set(key, val) {
     MEM[key] = JSON.stringify(val);
-    try { localStorage.setItem('sosedi3_' + key, MEM[key]); } catch (e) {}
+    try { localStorage.setItem('sosedi4_' + key, MEM[key]); } catch (e) {}
   },
   del(key) {
     delete MEM[key];
-    try { localStorage.removeItem('sosedi3_' + key); } catch (e) {}
+    try { localStorage.removeItem('sosedi4_' + key); } catch (e) {}
   }
 };
 
@@ -143,7 +143,7 @@ function getUsers() {
 function saveUsers(u) { DB.set('users', u); }
 function currentUser() {
   let email = DB.get('session', null);
-  if (!email) { try { email = JSON.parse(sessionStorage.getItem('sosedi3_session')); } catch (e) {} }
+  if (!email) { try { email = JSON.parse(sessionStorage.getItem('sosedi4_session')); } catch (e) {} }
   if (!email) email = MEM.tabSession || null;
   if (!email) return null;
   return getUsers().find(u => u.email === email) || null;
@@ -151,18 +151,18 @@ function currentUser() {
 function login(email, remember) {
   MEM.tabSession = email;
   if (remember) DB.set('session', email);
-  else { DB.del('session'); try { sessionStorage.setItem('sosedi3_session', JSON.stringify(email)); } catch (e) {} }
+  else { DB.del('session'); try { sessionStorage.setItem('sosedi4_session', JSON.stringify(email)); } catch (e) {} }
 }
 function logout() {
   delete MEM.tabSession;
   DB.del('session');
-  try { sessionStorage.removeItem('sosedi3_session'); } catch (e) {}
+  try { sessionStorage.removeItem('sosedi4_session'); } catch (e) {}
 }
 
 /* ===== объявления ===== */
-/* примеры объявлений; me — пользователь, для которого создаются займы */
+/* примеры объявлений; me — пользователь, для которого создаются обмены */
 function seedItems(me = DEMO_USER) {
-  const N = (name, bld, room, tg) => ({ ownerName: name, owner: tg + '@n', bld: DORM_BY_TG[tg] || 'm1', room, tg });
+  const N = (name, bld, room, tg) => ({ ownerName: name, owner: tg + '@n', bld: DORM_BY_TG[tg] || 'm1', room, tg: tg + '_demo' });
   let id = 1;
   const mk = (o) => Object.assign({
     id: 'i' + (id++), status: 'free', uses: 0, created: iso(addDays(-id)), rating: null, reviews: 0
@@ -230,13 +230,55 @@ function seedItems(me = DEMO_USER) {
   ];
 }
 
-/* примеры объявлений выключены — каталог пустой, пока студенты не выложат свои */
-const SEED_DEMO_LISTINGS = false;
+/* объявления, которые видны в каталоге с самого начала (все свободны — их можно взять) */
+function defaultListings() {
+  const L = (n, o) => Object.assign({
+    id: 'd' + n, status: 'free', uses: 0, rating: null, reviews: 0, created: iso(addDays(-n))
+  }, o, { owner: o.tg + '@demo' });
+  return [
+    L(1, { type: 'thing', title: 'Электродрель с набором свёрл', cat: 'Инструменты', emoji: '🔧', uses: 14,
+      desc: 'Подойдёт, чтобы повесить полку или карниз. Свёрла по дереву и бетону в комплекте.',
+      ownerName: 'Иван Морозов', bld: 'm2', room: '214', tg: '@ivan_morozov_demo' }),
+    L(2, { type: 'service', title: 'Приготовлю домашний суп', cat: 'Другое', emoji: '🍲', uses: 9, rating: 4.9, reviews: 8,
+      desc: 'Борщ, куриный или грибной суп на 3–4 порции. Продукты ваши — или скинемся вместе.',
+      ownerName: 'Мария Соколова', bld: 'm1', room: '305', tg: '@masha_sokolova_demo' }),
+    L(3, { type: 'thing', title: 'Ножницы портновские', cat: 'Инструменты', emoji: '✂️', uses: 6,
+      desc: 'Острые, большие — для ткани, картона и любых поделок.',
+      ownerName: 'Анна Кузнецова', bld: 'g1', room: '118', tg: '@anna_kuznetsova_demo' }),
+    L(4, { type: 'thing', title: 'Портативная колонка', cat: 'Бытовая техника', emoji: '🔊', uses: 11,
+      desc: 'Bluetooth, держит заряд около 10 часов. Для праздника на этаже или тренировки.',
+      ownerName: 'Дмитрий Орлов', bld: 'dsg', room: '512', tg: '@dima_orlov_demo' }),
+    L(5, { type: 'thing', title: 'Утюг с отпаривателем', cat: 'Бытовая техника', emoji: '👔', uses: 23,
+      desc: 'Вертикальное отпаривание — удобно перед защитой или собеседованием.',
+      ownerName: 'Елена Попова', bld: 'm3', room: '401', tg: '@lena_popova_demo' }),
+    L(6, { type: 'service', title: 'Починю ноутбук, установлю Windows', cat: 'Ремонт техники', emoji: '💻', uses: 17, rating: 4.8, reviews: 15,
+      desc: 'Чистка от пыли, замена термопасты, установка системы и программ.',
+      ownerName: 'Артём Волков', bld: 'g2', room: '220', tg: '@artem_volkov_demo' }),
+    L(7, { type: 'service', title: 'Помогу с английским языком', cat: 'Помощь с учёбой', emoji: '🇬🇧', uses: 7, rating: 5.0, reviews: 6,
+      desc: 'Разговорная практика и подготовка к экзамену, уровень C1.',
+      ownerName: 'Софья Лебедева', bld: 'm4', room: '109', tg: '@sofia_lebedeva_demo' }),
+    L(8, { type: 'thing', title: 'Настольная игра «Мафия»', cat: 'Игры', emoji: '🎲', uses: 12,
+      desc: 'Карты и маски на 12 человек — для вечера с соседями.',
+      ownerName: 'Никита Смирнов', bld: 'dk', room: '33', tg: '@nikita_smirnov_demo' }),
+    L(9, { type: 'thing', title: 'Фен для волос', cat: 'Бытовая техника', emoji: '💨', uses: 8,
+      desc: '2000 Вт, три режима и насадка-концентратор.',
+      ownerName: 'Полина Зайцева', bld: 'm2', room: '318', tg: '@polina_zaitseva_demo' }),
+    L(10, { type: 'thing', title: 'Стремянка 5 ступеней', cat: 'Инструменты', emoji: '🪜', uses: 15,
+      desc: 'Алюминиевая и лёгкая: поменять лампочку или повесить шторы.',
+      ownerName: 'Кирилл Новиков', bld: 'g1', room: '407', tg: '@kirill_novikov_demo' }),
+    L(11, { type: 'service', title: 'Мужские стрижки машинкой', cat: 'Красота', emoji: '💈', uses: 21, rating: 4.7, reviews: 18,
+      desc: 'Своя машинка и насадки, всё чисто. Около 20 минут.',
+      ownerName: 'Тимур Ахметов', bld: 'dsg', room: '615', tg: '@timur_akhmetov_demo' }),
+    L(12, { type: 'thing', title: 'Мультиварка', cat: 'Кухня', emoji: '🍳', uses: 10,
+      desc: 'Каша, плов, тушёные овощи — приготовится, пока вы на парах.',
+      ownerName: 'Алина Фёдорова', bld: 'm1', room: '212', tg: '@alina_fedorova_demo' })
+  ];
+}
 
 function getItems() {
   const items = DB.get('items', null);
   if (items) return items;
-  const seeded = SEED_DEMO_LISTINGS ? seedItems() : [];
+  const seeded = defaultListings();
   DB.set('items', seeded);
   return seeded;
 }

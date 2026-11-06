@@ -40,19 +40,19 @@ document.addEventListener('click', e => {
 });
 $('#burger').addEventListener('click', () => $('#nav').classList.toggle('open'));
 $('#logoutBtn').addEventListener('click', () => { logout(); location.hash = ''; location.reload(); });
-/* тестовые данные: примеры объявлений и займов для текущего пользователя */
+/* тестовые данные: примеры объявлений и обменов для текущего пользователя */
 $('#fillBtn').addEventListener('click', () => {
   $$('.dropdown').forEach(d => d.hidden = true);
   const own = items.filter(i => i.owner === ME.email && !i.id.startsWith('i'));
   const others = items.filter(i => i.owner !== ME.email && !i.id.startsWith('i'));
   items = [...own, ...others, ...seedItems({ email: ME.email, name: ME.name, bld: ME.bld, room: ME.room, tg: ME.tg })];
   persist(); route();
-  toast('✓', 'Примеры добавлены', ' Займы и напоминания доступны в разделе «Мои займы»');
+  toast('✓', 'Примеры добавлены', ' Обмены и напоминания доступны в разделе «Мои обмены»');
   updateBell();
 });
 $('#resetBtn').addEventListener('click', () => {
   $$('.dropdown').forEach(d => d.hidden = true);
-  if (!confirm('Удалить все объявления и займы? Это действие нельзя отменить.')) return;
+  if (!confirm('Удалить все объявления и обмены? Это действие нельзя отменить.')) return;
   items = []; persist(); route();
   toast('✓', 'Объявления удалены');
 });
@@ -423,8 +423,8 @@ function pageAbout() {
     <h2 class="sec">Порядок работы</h2>
     <div class="steps">
       <div class="step"><div class="n">1</div><b>Поиск</b><p>Найдите вещь или услугу в каталоге, используя фильтры по общежитию и категории.</p></div>
-      <div class="step"><div class="n">2</div><b>Оформление</b><p>Укажите срок возврата и свяжитесь с владельцем по контактам из карточки.</p></div>
-      <div class="step"><div class="n">3</div><b>Пользование</b><p>Срок займа отображается в разделе «Мои займы»; напоминание можно добавить в календарь.</p></div>
+      <div class="step"><div class="n">2</div><b>Договорённость</b><p>Укажите срок возврата — сервис покажет Telegram владельца, чтобы договориться о передаче.</p></div>
+      <div class="step"><div class="n">3</div><b>Пользование</b><p>Срок пользования отображается в разделе «Мои обмены»; напоминание можно добавить в календарь.</p></div>
       <div class="step"><div class="n">4</div><b>Возврат</b><p>Сервис напомнит о возврате заранее и уведомит владельца о просрочке. После возврата оцените обмен.</p></div>
     </div>
     <h2 class="sec">Правила обмена</h2>
@@ -468,7 +468,7 @@ function openItem(id) {
           <div class="quick">${[1, 2, 3, 7, 14].map(d => `<button type="button" data-d="${d}" class="${d === 3 ? 'on' : ''}">${d} ${plural(d, 'день', 'дня', 'дней')}</button>`).join('')}</div></label>
         <label><span>Дата возврата</span><input class="ctl" type="date" name="to" value="${iso(addDays(3))}" min="${iso(addDays(1))}" max="${iso(addDays(30))}" required></label>
         <p class="meta">Напоминание придёт за день до срока и в день возврата.</p>
-        <div class="m-actions"><button type="button" class="btn m-cancel">Отмена</button><button class="btn primary">Оформить займ</button></div>
+        <div class="m-actions"><button type="button" class="btn m-cancel">Отмена</button><button class="btn primary">Взять на время</button></div>
       </form>`;
   } else if (iBorrow) {
     const p = loanProgress(it);
@@ -494,7 +494,8 @@ function openItem(id) {
       <p class="desc">${esc(it.desc)}</p>
       <div class="owner">
         <span class="avatar">${initials(it.ownerName)}</span>
-        <div style="flex:1"><b>${mine ? 'Ты' : esc(it.ownerName)}</b><small>${esc(dormName(it.bld))}${it.room ? ', комната ' + esc(it.room) : ''}${it.tg ? ' · ' + esc(it.tg) : ''}</small></div>
+        <div style="flex:1"><b>${mine ? 'Ты' : esc(it.ownerName)}</b><small>${esc(dormName(it.bld))}${it.room ? ', комната ' + esc(it.room) : ''}</small></div>
+        ${it.tg && !mine ? `<a class="btn tg-btn sm" href="${tgUrl(it.tg)}" target="_blank" rel="noopener">${TG_ICON} Написать</a>` : ''}
       </div>
       ${action}
     </div>`);
@@ -514,15 +515,14 @@ function openItem(id) {
     e.preventDefault();
     if (it.type === 'service') {
       it.uses++; logEvent({ type: 'service', who: ME.email, owner: it.owner, item: it.title });
-      persist(); closeModal();
-      toast('📨', 'Заявка отправлена', ` Исполнитель (${it.ownerName}) свяжется с вами${it.tg ? ': ' + it.tg : ''}.`);
+      persist(); closeModal(); showContact(it, 'service');
     } else {
       const to = f.to.value;
       if (!to || daysUntil(to) < 1) { toast('!', 'Дата возврата должна быть не раньше завтрашнего дня'); return; }
       Object.assign(it, { status: 'busy', borrower: ME.email, borrowerName: ME.name, from: iso(today()), to });
       it.uses++; logEvent({ type: 'borrow', who: ME.email, owner: it.owner, item: it.title });
       persist(); closeModal(); route();
-      toast('✓', 'Займ оформлен до ' + fmtDate(to), ` Владелец: ${it.ownerName}, ${dormName(it.bld)}${it.room ? ', комн. ' + it.room : ''}.`);
+      showContact(it, 'thing');
     }
   });
 }
@@ -606,6 +606,45 @@ function deleteItem(id) {
   toast('✓', 'Объявление удалено');
 }
 
+
+
+/* ---------- контакт владельца после «Взять на время» / заявки на услугу ---------- */
+const TG_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3 18.7 19.4c-.2 1-.9 1.3-1.7.8l-4.8-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.9 8.9-8c.4-.3-.1-.5-.6-.2L6.5 13.2l-4.7-1.5c-1-.3-1-1 .2-1.5l18.4-7.1c.9-.3 1.6.2 1.5 1.2z"/></svg>';
+function longDate(isoStr) { return parseIso(isoStr).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }); }
+function tgUrl(tg) { return 'https://t.me/' + encodeURIComponent(String(tg).replace(/^@/, '')); }
+
+function showContact(it, kind) {
+  const first = it.ownerName.split(' ')[0];
+  const msg = kind === 'thing'
+    ? `Здравствуйте! Хочу взять «${it.title}» через «МИСИС Соседи» до ${longDate(it.to)}. Когда удобно забрать?`
+    : `Здравствуйте! Пишу по объявлению «${it.title}» в «МИСИС Соседи».`;
+  openModal(`
+    <div class="m-body contact">
+      <div class="ok-mark">✓</div>
+      <h3>${kind === 'thing' ? 'Вещь закреплена за вами' : 'Заявка отправлена'}</h3>
+      <p class="meta">${kind === 'thing'
+        ? `до <b>${longDate(it.to)}</b>. Напишите владельцу, чтобы договориться, когда и где забрать вещь.`
+        : `Напишите исполнителю, чтобы договориться о времени.`}</p>
+      <div class="owner">
+        <span class="avatar">${initials(it.ownerName)}</span>
+        <div style="flex:1"><b>${esc(it.ownerName)}</b><small>${esc(dormName(it.bld))}${it.room ? ', комната ' + esc(it.room) : ''}</small></div>
+      </div>
+      ${it.tg ? `
+        <a class="btn tg-btn big" href="${tgUrl(it.tg)}" target="_blank" rel="noopener">${TG_ICON} Написать в Telegram ${esc(it.tg)}</a>
+        <div class="msg-box"><small>Готовое сообщение</small><p id="msgText">${esc(msg)}</p></div>
+        <div class="m-actions" style="justify-content:space-between">
+          <button class="btn" id="copyMsg">📋 Скопировать сообщение</button>
+          <div style="display:flex;gap:8px">${kind === 'thing' ? '<button class="btn" id="cIcs">📅 В календарь</button>' : ''}<button class="btn primary m-cancel">Готово</button></div>
+        </div>`
+      : `<p class="meta">Владелец не указал Telegram — найдите его по адресу: ${esc(dormName(it.bld))}${it.room ? ', комната ' + esc(it.room) : ''}.</p>
+        <div class="m-actions"><button class="btn primary m-cancel">Готово</button></div>`}
+    </div>`);
+  $('.m-cancel').addEventListener('click', closeModal);
+  $('#cIcs')?.addEventListener('click', () => downloadIcs(it.id));
+  $('#copyMsg')?.addEventListener('click', () => {
+    navigator.clipboard?.writeText(msg).then(() => toast('✓', 'Сообщение скопировано', ' Вставьте его в чат с ' + first)).catch(() => toast('!', 'Не удалось скопировать'));
+  });
+}
 
 /* ================= Дополнительно: статистика, достижения, оценки, календарь, тема ================= */
 function getLog() { return DB.get('log', []); }

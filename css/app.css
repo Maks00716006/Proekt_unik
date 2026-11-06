@@ -334,3 +334,17 @@ body, #appScreen .card, #appScreen .group, #appScreen .ctl, #appScreen .btn, #ap
 @media (max-width: 900px) { #appScreen .prof-grid { grid-template-columns: 1fr; } }
 @media (max-width: 600px) { #appScreen .hero-btn { align-self: center; } #appScreen .tile b { font-size: 24px; } }
 #appScreen .about-hero p + p { margin-top: 12px; }
+
+/* Telegram и окно контакта */
+#appScreen .tg-btn { background: #229ed9; border-color: #229ed9; color: #fff; text-decoration: none; font-weight: 600; }
+#appScreen .tg-btn:hover { background: #1b8bc0; }
+#appScreen .tg-btn.big { display: flex; width: 100%; height: 46px; font-size: 15.5px; margin-bottom: 12px; }
+#appScreen .contact { text-align: center; }
+#appScreen .contact .owner { text-align: left; margin-top: 16px; }
+#appScreen .contact h3 { margin-top: 6px; }
+#appScreen .ok-mark { width: 56px; height: 56px; margin: 0 auto; border-radius: 50%; background: #e3f6ec; color: var(--green); font-size: 28px; font-weight: 800; display: grid; place-items: center; animation: pop .4s cubic-bezier(.2,.9,.3,1.5); }
+@keyframes pop { from { transform: scale(.3); } }
+#appScreen .msg-box { text-align: left; background: var(--panel); border: 1px dashed var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 4px; }
+#appScreen .msg-box small { color: var(--muted); font-size: 12px; }
+#appScreen .msg-box p { margin-top: 4px; font-size: 14px; line-height: 1.45; }
+:root[data-theme="dark"] #appScreen .ok-mark { background: #143524; }
