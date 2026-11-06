@@ -12,7 +12,7 @@ const closedGroups = new Set();
 /* ---------- вход-анимация и приветствие ---------- */
 if (DB.get('justLoggedIn', false)) {
   DB.del('justLoggedIn');
-  setTimeout(() => toast('👋', `${t('hello')}, ${ME.name.split(' ')[0]}!`, ' ' + t('welcome') + ' · ' + dormName(ME.bld)), 700);
+  setTimeout(() => toast('✓', t('welcome'), ' ' + ME.name + ' · ' + dormName(ME.bld)), 700);
   setTimeout(() => remindersToast(), 2200);
 } else {
   $('#intro').remove();
@@ -40,9 +40,21 @@ document.addEventListener('click', e => {
 });
 $('#burger').addEventListener('click', () => $('#nav').classList.toggle('open'));
 $('#logoutBtn').addEventListener('click', () => { logout(); location.hash = ''; location.reload(); });
+/* тестовые данные: примеры объявлений и займов для текущего пользователя */
+$('#fillBtn').addEventListener('click', () => {
+  $$('.dropdown').forEach(d => d.hidden = true);
+  const own = items.filter(i => i.owner === ME.email && !i.id.startsWith('i'));
+  const others = items.filter(i => i.owner !== ME.email && !i.id.startsWith('i'));
+  items = [...own, ...others, ...seedItems({ email: ME.email, name: ME.name, bld: ME.bld, room: ME.room, tg: ME.tg })];
+  persist(); route();
+  toast('✓', 'Примеры добавлены', ' Займы и напоминания доступны в разделе «Мои займы»');
+  updateBell();
+});
 $('#resetBtn').addEventListener('click', () => {
-  DB.del('items'); items = getItems(); route(); updateBell();
-  toast('↺', 'Демо-данные восстановлены');
+  $$('.dropdown').forEach(d => d.hidden = true);
+  if (!confirm('Удалить все объявления и займы? Это действие нельзя отменить.')) return;
+  items = []; persist(); route();
+  toast('✓', 'Объявления удалены');
 });
 /* подвал: список общежитий */
 function renderFooterDorms() {
@@ -74,7 +86,7 @@ function openDormPicker() {
     persist(); closeModal();
     $('#umRoom').textContent = where();
     route();
-    toast('🏠', t('dormSaved'), ' ' + dormName(chosen));
+    toast('✓', t('dormSaved'), ' ' + dormName(chosen));
   });
 }
 $('#dormBtn').addEventListener('click', openDormPicker);
@@ -114,10 +126,10 @@ function getReminders() {
     if (it.status !== 'busy' || !it.to) return;
     const d = daysUntil(it.to);
     if (it.borrower === ME.email) {
-      if (d < 0) list.push({ lvl: 'red', it, text: `Верни «${it.title}» — просрочено на ${-d} ${plural(-d, 'день', 'дня', 'дней')}`, sub: `Владелец: ${it.ownerName}, ${dormName(it.bld)}, комн. ${it.room}` });
-      else if (d <= 1) list.push({ lvl: 'yellow', it, text: `Верни «${it.title}» ${d === 0 ? 'сегодня' : 'завтра'}`, sub: `Владелец: ${it.ownerName}, ${dormName(it.bld)}, комн. ${it.room}` });
+      if (d < 0) list.push({ lvl: 'red', it, text: `Срок возврата «${it.title}» истёк ${-d} ${plural(-d, 'день', 'дня', 'дней')} назад`, sub: `Владелец: ${it.ownerName}, ${dormName(it.bld)}, комн. ${it.room}` });
+      else if (d <= 1) list.push({ lvl: 'yellow', it, text: `Необходимо вернуть «${it.title}» ${d === 0 ? 'сегодня' : 'завтра'}`, sub: `Владелец: ${it.ownerName}, ${dormName(it.bld)}, комн. ${it.room}` });
     } else if (it.owner === ME.email && d < 0) {
-      list.push({ lvl: 'red', it, text: `${it.borrowerName} не вернул(а) «${it.title}»`, sub: `Срок истёк ${fmtDate(it.to)}` });
+      list.push({ lvl: 'red', it, text: `«${it.title}» не возвращено: ${it.borrowerName}`, sub: `Срок истёк ${fmtDate(it.to)}` });
     }
   });
   return list;
@@ -137,7 +149,7 @@ function remindersToast() {
   const rem = getReminders();
   if (!rem.length) return;
   const r = rem[0];
-  toast(r.lvl === 'red' ? '⚠️' : '⏰', r.text, rem.length > 1 ? ` И ещё ${rem.length - 1} в колокольчике.` : '');
+  toast('!', r.text, rem.length > 1 ? ` Ещё напоминаний: ${rem.length - 1}.` : '');
   if ('Notification' in window && Notification.permission === 'granted') {
     try { new Notification('Соседи: напоминание', { body: r.text, icon: 'assets/favicon.svg' }); } catch (e) {}
   }
@@ -214,8 +226,8 @@ function bindCards(root) {
       const a = ev.target.dataset.a; m.remove();
       if (a === 'open') openItem(it.id);
       if (a === 'del') deleteItem(it.id);
-      if (a === 'copy') { navigator.clipboard?.writeText(it.tg || '').catch(() => {}); toast('📋', 'Контакт скопирован', ` ${it.tg}`); }
-      if (a === 'report') toast('🚩', 'Жалоба отправлена', ' Модератор общежития проверит объявление');
+      if (a === 'copy') { navigator.clipboard?.writeText(it.tg || '').catch(() => {}); toast('✓', 'Контакт скопирован', ` ${it.tg}`); }
+      if (a === 'report') toast('✓', 'Жалоба отправлена', ' Объявление будет проверено модератором');
     });
   }));
   $$('[data-act]', root).forEach(b => b.addEventListener('click', e => {
@@ -336,7 +348,7 @@ function pageCatalog() {
 function pageMy() {
   const mine = items.filter(i => i.owner === ME.email);
   const things = mine.filter(i => i.type === 'thing'), services = mine.filter(i => i.type === 'service');
-  const act = it => (it.status === 'busy' ? `<button class="btn sm success" data-act="ret">✓ Мне вернули</button>` : '') +
+  const act = it => (it.status === 'busy' ? `<button class="btn sm success" data-act="ret">✓ Подтвердить возврат</button>` : '') +
     `<button class="btn sm danger" data-act="del">Удалить</button>`;
   $('#view').innerHTML = `
   <div class="page">
@@ -344,17 +356,17 @@ function pageMy() {
       <h1 style="margin:0">${t('myAds')}</h1>
       <div class="right-tools">
         <span class="pill">Всего: ${mine.length}</span>
-        <button class="btn primary" id="newThing">＋ Выложить вещь</button>
+        <button class="btn primary" id="newThing">＋ Разместить вещь</button>
         <button class="btn" id="newService">＋ Предложить услугу</button>
       </div>
     </div>
     <section class="group"><div class="group-h"><span class="chev">▼</span><b>📦 Мои вещи</b><span class="pill">${things.length} · на руках у соседей: ${things.filter(t => t.status === 'busy').length}</span></div>
       ${things.length ? `<div class="grid">${things.map((it, i) => cardHtml(it, { i, actions: act(it) })).join('')}</div>`
-        : `<div class="empty"><div class="big">📦</div>У тебя пока нет вещей в обмене</div>`}
+        : `<div class="empty"><div class="big">📦</div>У вас пока нет размещённых вещей</div>`}
     </section>
     <section class="group"><div class="group-h"><span class="chev">▼</span><b>🤝 Мои услуги</b><span class="pill">${services.length}</span></div>
       ${services.length ? `<div class="grid">${services.map((it, i) => cardHtml(it, { i, actions: act(it) })).join('')}</div>`
-        : `<div class="empty"><div class="big">🤝</div>Умеешь что-то полезное? Расскажи соседям!</div>`}
+        : `<div class="empty"><div class="big">🤝</div>Вы можете предложить соседям свою услугу</div>`}
     </section>
   </div>`;
   $('#newThing').addEventListener('click', () => openNew('thing'));
@@ -374,21 +386,21 @@ function pageLoans() {
   <div class="page">
     <div class="toprow">
       <h1 style="margin:0">${t('myLoans')}</h1>
-      <div class="right-tools">${notifBtn}<span class="pill">Взял: ${took.length} · одолжил: ${lent.length}</span></div>
+      <div class="right-tools">${notifBtn}<span class="pill">Взято: ${took.length} · передано: ${lent.length}</span></div>
     </div>
     ${rem.map(r => `<div class="alert ${r.lvl}"><span class="ai">${r.lvl === 'red' ? '⚠️' : '⏰'}</span><div class="grow"><b>${esc(r.text)}</b><div class="meta" style="color:inherit;opacity:.8">${esc(r.sub)}</div></div></div>`).join('')}
-    <section class="group"><div class="group-h"><span class="chev">▼</span><b>📥 Я взял на время</b><span class="tag blue">Нужно вернуть</span><span class="pill">${took.length}</span></div>
-      ${took.length ? `<div class="grid">${took.map((it, i) => cardHtml(it, { i, loan: true, actions: `<button class="btn sm" data-act="ics" title="Добавить напоминание в календарь телефона">📅 В календарь</button><button class="btn sm success" data-act="ret">✓ Я вернул</button>` })).join('')}</div>`
-        : `<div class="empty"><div class="big">🙌</div>Ты ничего не должен соседям. <a href="#catalog">Найти вещь в каталоге</a></div>`}
+    <section class="group"><div class="group-h"><span class="chev">▼</span><b>📥 Взято мной</b><span class="tag blue">Нужно вернуть</span><span class="pill">${took.length}</span></div>
+      ${took.length ? `<div class="grid">${took.map((it, i) => cardHtml(it, { i, loan: true, actions: `<button class="btn sm" data-act="ics" title="Добавить напоминание в календарь телефона">📅 В календарь</button><button class="btn sm success" data-act="ret">✓ Отметить возврат</button>` })).join('')}</div>`
+        : `<div class="empty"><div class="big">📭</div>Взятых вещей нет. <a href="#catalog">Перейти в каталог</a></div>`}
     </section>
-    <section class="group"><div class="group-h"><span class="chev">▼</span><b>📤 У меня взяли</b><span class="pill">${lent.length}</span></div>
-      ${lent.length ? `<div class="grid">${lent.map((it, i) => cardHtml(it, { i, loan: true, actions: `<button class="btn sm" data-act="remind">🔔 Напомнить</button><button class="btn sm success" data-act="ret">✓ Мне вернули</button>` })).join('')}</div>`
-        : `<div class="empty"><div class="big">📭</div>Сейчас никто не пользуется твоими вещами</div>`}
+    <section class="group"><div class="group-h"><span class="chev">▼</span><b>📤 Передано мной</b><span class="pill">${lent.length}</span></div>
+      ${lent.length ? `<div class="grid">${lent.map((it, i) => cardHtml(it, { i, loan: true, actions: `<button class="btn sm" data-act="remind">🔔 Напомнить</button><button class="btn sm success" data-act="ret">✓ Подтвердить возврат</button>` })).join('')}</div>`
+        : `<div class="empty"><div class="big">📭</div>Ваши вещи сейчас никому не переданы</div>`}
     </section>
   </div>`;
   $('#notifBtn')?.addEventListener('click', async () => {
     const p = await Notification.requestPermission();
-    toast(p === 'granted' ? '✅' : '🔕', p === 'granted' ? 'Уведомления включены' : 'Уведомления не разрешены');
+    toast(p === 'granted' ? '✓' : '!', p === 'granted' ? 'Уведомления включены' : 'Уведомления не разрешены');
     pageLoans();
   });
   $$('.group-h').forEach(h => h.addEventListener('click', () => h.parentElement.classList.toggle('closed')));
@@ -400,26 +412,30 @@ function pageAbout() {
   <div class="page">
     <div class="about-hero">
       <h1>${t('aboutTitle')}</h1>
-      <p>Многие вещи нужны пару раз в год — дрель, стремянка, инструменты, — и соседям приходится покупать такие же.
-      А кто-то умеет чинить ноутбуки или объяснять матан, но об этом никто не знает. Найти нужное через общие чаты сложно.
-      «Соседи» собирают всё в одном месте: бери вещи на время, выкладывай свои, предлагай помощь — а сервис напомнит, когда пора вернуть.</p>
+      <p>«МИСИС Соседи» — сервис взаимопомощи для студентов, проживающих в общежитиях университета.</p>
+      <p>Многие предметы быта — инструменты, стремянки, бытовая техника — требуются студентам лишь эпизодически,
+      однако каждому приходится приобретать их самостоятельно. Вместе с тем многие студенты обладают полезными навыками
+      (ремонт техники, помощь в учёбе), но информация об этом не доходит до соседей, а поиск через общие чаты малоэффективен.</p>
+      <p>Сервис объединяет предложения в едином каталоге: студенты могут взять вещь во временное пользование,
+      разместить собственную или предложить услугу. Система фиксирует сроки возврата и своевременно напоминает о них,
+      что позволяет сократить расходы студентов и развивать культуру взаимопомощи.</p>
     </div>
-    <h2 class="sec">Как это работает</h2>
+    <h2 class="sec">Порядок работы</h2>
     <div class="steps">
-      <div class="step"><div class="n">1</div><b>Найди</b><p>Ищи вещь или услугу в каталоге с фильтром по общежитию и категории.</p></div>
-      <div class="step"><div class="n">2</div><b>Договорись</b><p>Выбери срок возврата и напиши соседу — контакты в карточке.</p></div>
-      <div class="step"><div class="n">3</div><b>Пользуйся</b><p>Срок и прогресс займа видны в разделе «Мои займы».</p></div>
-      <div class="step"><div class="n">4</div><b>Верни вовремя</b><p>Сервис напомнит за день до срока и сообщит владельцу о просрочке.</p></div>
+      <div class="step"><div class="n">1</div><b>Поиск</b><p>Найдите вещь или услугу в каталоге, используя фильтры по общежитию и категории.</p></div>
+      <div class="step"><div class="n">2</div><b>Оформление</b><p>Укажите срок возврата и свяжитесь с владельцем по контактам из карточки.</p></div>
+      <div class="step"><div class="n">3</div><b>Пользование</b><p>Срок займа отображается в разделе «Мои займы»; напоминание можно добавить в календарь.</p></div>
+      <div class="step"><div class="n">4</div><b>Возврат</b><p>Сервис напомнит о возврате заранее и уведомит владельца о просрочке. После возврата оцените обмен.</p></div>
     </div>
     <h2 class="sec">Правила обмена</h2>
     <ul class="rules">
-      <li>Возвращай вещи в том же состоянии и в срок.</li>
-      <li>Если сломал — честно скажи владельцу и договоритесь о ремонте.</li>
-      <li>Запрещены объявления о продаже алкоголя, опасных и запрещённых предметов.</li>
-      <li>Услуги между соседами — на добровольной основе.</li>
+      <li>Вещи возвращаются в установленный срок и в исходном состоянии.</li>
+      <li>О повреждении вещи необходимо сообщить владельцу и согласовать порядок ремонта или компенсации.</li>
+      <li>Запрещено размещение объявлений об алкоголе, опасных и запрещённых предметах.</li>
+      <li>Услуги оказываются на добровольной основе.</li>
     </ul>
     <h2 class="sec">Поддержка</h2>
-    <p class="meta" style="font-size:15px">Вопросы и предложения — студсовету общежития или автору проекта.</p>
+    <p class="meta" style="font-size:15px">По вопросам работы сервиса обращайтесь в студенческий совет общежития.</p>
   </div>`;
 }
 
@@ -442,27 +458,27 @@ function openItem(id) {
   if (it.type === 'service' && !mine) {
     action = `
       <form class="form" id="actForm">
-        <label><span>Что нужно?</span><textarea class="ctl" name="msg" placeholder="Например: не включается ноутбук после обновления">Привет! Нужна помощь: </textarea></label>
-        <div class="m-actions"><button type="button" class="btn m-cancel">Отмена</button><button class="btn primary">Откликнуться</button></div>
+        <label><span>Описание запроса</span><textarea class="ctl" name="msg" placeholder="Опишите, какая помощь требуется"></textarea></label>
+        <div class="m-actions"><button type="button" class="btn m-cancel">Отмена</button><button class="btn primary">Отправить заявку</button></div>
       </form>`;
   } else if (it.type === 'thing' && !mine && it.status === 'free') {
     action = `
       <form class="form" id="actForm">
-        <label><span>На сколько берёшь?</span>
+        <label><span>Срок пользования</span>
           <div class="quick">${[1, 2, 3, 7, 14].map(d => `<button type="button" data-d="${d}" class="${d === 3 ? 'on' : ''}">${d} ${plural(d, 'день', 'дня', 'дней')}</button>`).join('')}</div></label>
-        <label><span>Верну до</span><input class="ctl" type="date" name="to" value="${iso(addDays(3))}" min="${iso(addDays(1))}" max="${iso(addDays(30))}" required></label>
-        <p class="meta">⏰ Напомним за день до срока и в день возврата.</p>
-        <div class="m-actions"><button type="button" class="btn m-cancel">Отмена</button><button class="btn primary">Взять на время</button></div>
+        <label><span>Дата возврата</span><input class="ctl" type="date" name="to" value="${iso(addDays(3))}" min="${iso(addDays(1))}" max="${iso(addDays(30))}" required></label>
+        <p class="meta">Напоминание придёт за день до срока и в день возврата.</p>
+        <div class="m-actions"><button type="button" class="btn m-cancel">Отмена</button><button class="btn primary">Оформить займ</button></div>
       </form>`;
   } else if (iBorrow) {
     const p = loanProgress(it);
     action = `<p><span class="badge ${p.bcls}">${p.label}</span> &nbsp;Вернуть до <b>${fmtDate(it.to)}</b></p>
-      <div class="m-actions"><button class="btn" id="icsBtn">📅 В календарь</button><button class="btn success" id="retBtn">✓ Я вернул</button></div>`;
+      <div class="m-actions"><button class="btn" id="icsBtn">📅 В календарь</button><button class="btn success" id="retBtn">✓ Отметить возврат</button></div>`;
   } else if (it.status === 'busy') {
-    action = `<p class="meta">Сейчас у: <b>${esc(it.borrowerName)}</b> до ${fmtDate(it.to)}.${mine ? '' : ' Загляни позже или поищи похожее.'}</p>
-      ${mine ? `<div class="m-actions"><button class="btn" id="remBtn">🔔 Напомнить</button><button class="btn success" id="retBtn">✓ Мне вернули</button></div>` : ''}`;
+    action = `<p class="meta">Сейчас у: <b>${esc(it.borrowerName)}</b> до ${fmtDate(it.to)}.${mine ? '' : ' Вещь станет доступна после возврата.'}</p>
+      ${mine ? `<div class="m-actions"><button class="btn" id="remBtn">🔔 Напомнить</button><button class="btn success" id="retBtn">✓ Подтвердить возврат</button></div>` : ''}`;
   } else if (mine) {
-    action = `<p class="meta">Это твоё объявление. Его видят все жители общежития.</p>
+    action = `<p class="meta">Это ваше объявление. Оно доступно всем жителям общежитий.</p>
       <div class="m-actions"><button class="btn danger" id="delBtn">Удалить объявление</button></div>`;
   }
 
@@ -497,17 +513,16 @@ function openItem(id) {
   f.addEventListener('submit', e => {
     e.preventDefault();
     if (it.type === 'service') {
-      it.uses++; logEvent({ type: 'service', who: ME.email, owner: it.owner, item: it.title, price: priceOf(it) });
-      persist(); closeModal(); checkAchievements();
-      toast('📨', 'Заявка отправлена', ` ${it.ownerName.split(' ')[0]} получит сообщение и свяжется с тобой (${it.tg}).`);
+      it.uses++; logEvent({ type: 'service', who: ME.email, owner: it.owner, item: it.title });
+      persist(); closeModal();
+      toast('📨', 'Заявка отправлена', ` Исполнитель (${it.ownerName}) свяжется с вами${it.tg ? ': ' + it.tg : ''}.`);
     } else {
       const to = f.to.value;
-      if (!to || daysUntil(to) < 1) { toast('⚠️', 'Выбери дату возврата не раньше завтра'); return; }
+      if (!to || daysUntil(to) < 1) { toast('!', 'Дата возврата должна быть не раньше завтрашнего дня'); return; }
       Object.assign(it, { status: 'busy', borrower: ME.email, borrowerName: ME.name, from: iso(today()), to });
-      it.uses++; logEvent({ type: 'borrow', who: ME.email, owner: it.owner, item: it.title, price: priceOf(it) });
-      persist(); closeModal(); route(); confetti();
-      setTimeout(checkAchievements, 900);
-      toast('🎉', 'Вещь твоя до ' + fmtDate(to), ` Забрать: ${it.ownerName.split(' ')[0]}, ${dormName(it.bld)}${it.room ? ', комн. ' + it.room : ''}. Напомним о возврате!`);
+      it.uses++; logEvent({ type: 'borrow', who: ME.email, owner: it.owner, item: it.title });
+      persist(); closeModal(); route();
+      toast('✓', 'Займ оформлен до ' + fmtDate(to), ` Владелец: ${it.ownerName}, ${dormName(it.bld)}${it.room ? ', комн. ' + it.room : ''}.`);
     }
   });
 }
@@ -519,20 +534,18 @@ function openNew(type) {
     : ['💻', '🎓', '🐍', '✂️', '🇬🇧', '📷', '🧑‍🍳', '📦', '🎨', '✨'];
   openModal(`
     <div class="m-body">
-      <div class="toprow" style="margin-bottom:10px"><h3 style="margin:0">${type === 'thing' ? 'Выложить вещь' : 'Предложить услугу'}</h3><button class="btn sm m-x">✕</button></div>
+      <div class="toprow" style="margin-bottom:10px"><h3 style="margin:0">${type === 'thing' ? 'Разместить вещь' : 'Предложить услугу'}</h3><button class="btn sm m-x">✕</button></div>
       <form class="form" id="newForm">
         <div class="seg" style="width:max-content">
           <button type="button" data-t="thing" class="${type === 'thing' ? 'on' : ''}">Вещь</button>
           <button type="button" data-t="service" class="${type === 'service' ? 'on' : ''}">Услуга</button>
         </div>
-        <label><span>Название</span><input class="ctl" name="title" maxlength="70" required placeholder="${type === 'thing' ? 'Например: Паяльник 60 Вт' : 'Например: Помогу с английским'}"></label>
+        <label><span>Название</span><input class="ctl" name="title" maxlength="70" required placeholder="${type === 'thing' ? 'Например: паяльник 60 Вт' : 'Например: консультации по английским'}"></label>
         <div class="row2">
           <label><span>Категория</span><select class="ctl" name="cat">${cats.map(c => `<option>${c}</option>`).join('')}</select></label>
           <label><span>Контакт (Telegram)</span><input class="ctl" name="tg" value="${esc(ME.tg || '')}" placeholder="@username"></label>
         </div>
         <label><span>Описание</span><textarea class="ctl" name="desc" maxlength="400" placeholder="Состояние, комплектация, условия"></textarea></label>
-        <label><span>${type === 'thing' ? 'Сколько стоит новая, ₽' : 'Сколько стоила бы у мастера, ₽'} <small class="meta">(для подсчёта экономии)</small></span>
-          <input class="ctl" name="price" type="number" min="0" max="500000" step="100" placeholder="${DEFAULT_PRICE[cats[0]]}"></label>
         <label><span>Иконка</span><div class="emoji-pick">${emojis.map((e, i) => `<button type="button" class="${i === 0 ? 'on' : ''}">${e}</button>`).join('')}</div></label>
         <div class="m-actions"><button type="button" class="btn m-cancel">Отмена</button><button class="btn primary">Опубликовать</button></div>
       </form>
@@ -550,7 +563,7 @@ function openNew(type) {
   f.addEventListener('submit', e => {
     e.preventDefault();
     const title = f.elements.title.value.trim();
-    if (title.length < 3) { f.elements.title.focus(); toast('✏️', 'Название слишком короткое'); return; }
+    if (title.length < 3) { f.elements.title.focus(); toast('!', 'Название должно содержать не менее 3 символов'); return; }
     const tg = f.tg.value.trim();
     if (tg && tg !== ME.tg) {
       const users = getUsers(), u = users.find(x => x.email === ME.email);
@@ -558,15 +571,13 @@ function openNew(type) {
     }
     items.unshift({
       id: 'u' + Date.now(), type, title, cat: f.cat.value, emoji,
-      price: Math.max(0, Math.round(+f.price.value || DEFAULT_PRICE[f.cat.value] || 1000)),
       desc: f.desc.value.trim() || 'Без описания',
       owner: ME.email, ownerName: ME.name, bld: ME.bld, room: ME.room, tg,
       status: 'free', uses: 0, created: iso(today()) + 'T' + Date.now(), rating: null, reviews: 0
     });
     logEvent({ type: 'post', who: ME.email, item: title });
     persist(); closeModal();
-    toast('✅', 'Объявление опубликовано', ' Соседи уже могут его увидеть');
-    checkAchievements();
+    toast('✓', 'Объявление опубликовано');
     location.hash === '#my' ? route() : (location.hash = 'my');
   });
 }
@@ -581,29 +592,22 @@ function returnItem(id) {
   Object.assign(it, { status: 'free', borrower: null, borrowerName: null, from: null, to: null });
   persist(); route();
   setTimeout(() => askRating(other, it.title), 500);
-  checkAchievements();
-  toast('✅', wasMine ? 'Вещь снова у тебя' : 'Спасибо, что вернул!', wasMine ? ` «${it.title}» снова доступна соседям` : ` ${it.ownerName.split(' ')[0]} получит уведомление`);
+  toast('✓', wasMine ? 'Возврат подтверждён' : 'Возврат отмечен', wasMine ? ` «${it.title}» снова доступна в каталоге` : ` ${it.ownerName.split(' ')[0]} получит уведомление`);
 }
 function remindBorrower(id) {
   const it = items.find(x => x.id === id);
-  toast('🔔', 'Напоминание отправлено', ` ${it.borrowerName} получит сообщение о возврате «${it.title}»`);
+  toast('✓', 'Напоминание отправлено', ` ${it.borrowerName}: возврат «${it.title}»`);
 }
 function deleteItem(id) {
   const it = items.find(x => x.id === id);
-  if (!confirm(`Удалить «${it.title}»?`)) return;
+  if (!confirm(`Удалить объявление «${it.title}»?`)) return;
   items = items.filter(x => x.id !== id);
   persist(); route();
-  toast('🗑', 'Объявление удалено');
+  toast('✓', 'Объявление удалено');
 }
 
 
 /* ================= Дополнительно: статистика, достижения, оценки, календарь, тема ================= */
-const DEFAULT_PRICE = {
-  'Инструменты': 4500, 'Бытовая техника': 3500, 'Кухня': 3000, 'Спорт и отдых': 6000, 'Учёба': 1500, 'Игры': 2000,
-  'Ремонт техники': 1500, 'Помощь с учёбой': 1200, 'Красота': 800, 'Другое': 700
-};
-function priceOf(it) { return it.price || DEFAULT_PRICE[it.cat] || 1000; }
-
 function getLog() { return DB.get('log', []); }
 function logEvent(e) { const l = getLog(); l.push(Object.assign({ at: Date.now() }, e)); DB.set('log', l); }
 
@@ -615,61 +619,12 @@ function ratingOf(email) {
 
 function statsOf(email) {
   const log = getLog();
-  const borrowed = log.filter(e => e.type === 'borrow' && e.who === email);
-  const services = log.filter(e => e.type === 'service' && e.who === email);
   return {
-    borrowed: borrowed.length,
+    borrowed: log.filter(e => e.type === 'borrow' && e.who === email).length,
     lent: log.filter(e => e.type === 'borrow' && e.owner === email).length,
     helped: log.filter(e => e.type === 'service' && e.owner === email).length,
-    posted: log.filter(e => e.type === 'post' && e.who === email).length,
-    returnedOnTime: log.filter(e => e.type === 'return' && e.who === email && e.onTime).length,
-    saved: [...borrowed, ...services].reduce((s, e) => s + (e.price || 0), 0),
     rating: ratingOf(email)
   };
-}
-
-const ACHIEVEMENTS = [
-  { id: 'first_post', icon: '📦', name: 'Первый шаг', desc: 'Выложить первое объявление', ok: s => s.posted >= 1 },
-  { id: 'first_borrow', icon: '🤝', name: 'Знакомство с соседом', desc: 'Взять вещь или услугу у соседа', ok: s => s.borrowed + (s.saved && !s.borrowed ? 1 : 0) >= 1 },
-  { id: 'generous', icon: '🎁', name: 'Щедрый сосед', desc: 'Одолжить вещи 3 раза', ok: s => s.lent >= 3 },
-  { id: 'reliable', icon: '⏰', name: 'Надёжный', desc: 'Вернуть 3 вещи вовремя', ok: s => s.returnedOnTime >= 3 },
-  { id: 'saver', icon: '💰', name: 'Экономист', desc: 'Сэкономить 10 000 ₽', ok: s => s.saved >= 10000 },
-  { id: 'star', icon: '⭐', name: 'Звезда общежития', desc: 'Средняя оценка от 4.5 (мин. 3 оценки)', ok: s => s.rating && s.rating.n >= 3 && s.rating.avg >= 4.5 }
-];
-
-function checkAchievements() {
-  const s = statsOf(ME.email), key = 'ach_' + ME.email;
-  const have = DB.get(key, []);
-  const fresh = ACHIEVEMENTS.filter(a => a.ok(s) && !have.includes(a.id));
-  if (!fresh.length) return;
-  DB.set(key, [...have, ...fresh.map(a => a.id)]);
-  fresh.forEach((a, i) => setTimeout(() => { toast('🏆', 'Новое достижение: ' + a.name, ' ' + a.desc); confetti(); }, 600 + i * 900));
-}
-
-/* конфетти */
-function confetti() {
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const c = document.createElement('canvas');
-  c.className = 'confetti'; c.width = innerWidth; c.height = innerHeight;
-  document.body.appendChild(c);
-  const ctx = c.getContext('2d');
-  const colors = ['#1438f0', '#36e2fa', '#ffd25e', '#18a957', '#ff8fab', '#8775e9'];
-  const parts = Array.from({ length: 140 }, () => ({
-    x: innerWidth / 2 + (Math.random() - .5) * 200, y: innerHeight / 3,
-    vx: (Math.random() - .5) * 14, vy: Math.random() * -12 - 4,
-    s: 5 + Math.random() * 6, r: Math.random() * 6, vr: (Math.random() - .5) * .3,
-    c: colors[Math.floor(Math.random() * colors.length)]
-  }));
-  let frame = 0;
-  (function tick() {
-    ctx.clearRect(0, 0, c.width, c.height);
-    parts.forEach(p => {
-      p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
-      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
-      ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); ctx.restore();
-    });
-    if (++frame < 150) requestAnimationFrame(tick); else c.remove();
-  })();
 }
 
 /* оценка после возврата */
@@ -678,14 +633,13 @@ function askRating(other, title) {
   let stars = 0;
   openModal(`
     <div class="m-body" style="text-align:center">
-      <div style="font-size:44px">🤝</div>
-      <h3>Как прошёл обмен?</h3>
-      <p class="meta" style="margin:4px 0 14px">Оцени соседа: <b>${esc(other.name || '')}</b> · «${esc(title)}»</p>
+      <h3>Оценка обмена</h3>
+      <p class="meta" style="margin:4px 0 14px">Оцените соседа: <b>${esc(other.name || '')}</b> · «${esc(title)}»</p>
       <div class="rate" id="rate">${[1, 2, 3, 4, 5].map(n => `<button type="button" data-n="${n}" aria-label="${n}">★</button>`).join('')}</div>
       <p class="meta" id="rateTxt" style="min-height:20px;margin-top:6px"></p>
       <div class="m-actions" style="justify-content:center"><button class="btn m-cancel">Пропустить</button><button class="btn primary" id="rateSend" disabled>Оценить</button></div>
     </div>`);
-  const words = ['', 'Плохо 😕', 'Так себе', 'Нормально', 'Хорошо 🙂', 'Отлично! 🔥'];
+  const words = ['', 'Плохо', 'Удовлетворительно', 'Нормально', 'Хорошо', 'Отлично'];
   const paint = n => $$('#rate button').forEach(b => b.classList.toggle('on', +b.dataset.n <= n));
   $$('#rate button').forEach(b => {
     b.addEventListener('mouseenter', () => paint(+b.dataset.n));
@@ -696,8 +650,7 @@ function askRating(other, title) {
   $('#rateSend').addEventListener('click', () => {
     logEvent({ type: 'rate', from: ME.email, to: other.email, stars, item: title });
     closeModal(); route();
-    toast('⭐', 'Спасибо за оценку!', ' Так соседи понимают, кому можно доверять');
-    if (stars === 5) confetti();
+    toast('✓', 'Оценка сохранена');
   });
 }
 
@@ -711,7 +664,7 @@ function downloadIcs(id) {
     `UID:${it.id}-${d}@sosedi`, `DTSTAMP:${stamp}`,
     `DTSTART:${d}T100000`, `DTEND:${d}T103000`,
     `SUMMARY:Вернуть «${it.title}»`,
-    `DESCRIPTION:Владелец: ${it.ownerName}\\, ${dormName(it.bld)}${it.room ? '\\, комн. ' + it.room : ''}. Сервис «Соседи».`,
+    `DESCRIPTION:Владелец: ${it.ownerName}\\, ${dormName(it.bld)}${it.room ? '\\, комн. ' + it.room : ''}. Сервис «МИСИС Соседи».`,
     'BEGIN:VALARM', 'TRIGGER:-P1D', 'ACTION:DISPLAY', 'DESCRIPTION:Завтра вернуть вещь соседу', 'END:VALARM',
     'END:VEVENT', 'END:VCALENDAR'
   ].join('\r\n');
@@ -719,61 +672,98 @@ function downloadIcs(id) {
   a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
   a.download = 'vernut-' + it.id + '.ics';
   document.body.appendChild(a); a.click(); a.remove();
-  toast('📅', 'Напоминание скачано', ' Открой файл — событие добавится в календарь с оповещением за день');
+  toast('✓', 'Файл календаря загружен', ' Откройте его, чтобы добавить событие с напоминанием за день');
 }
 
 /* страница профиля */
 function pageProfile() {
-  const s = statsOf(ME.email), have = DB.get('ach_' + ME.email, []);
-  const log = getLog();
-  const byDorm = DORMS.map(d => {
-    const members = new Set(getUsers().filter(u => u.bld === d.id).map(u => u.email));
-    const saved = log.filter(e => (e.type === 'borrow' || e.type === 'service') && members.has(e.who)).reduce((a, e) => a + (e.price || 0), 0);
-    return { d, saved };
-  });
-  const maxSaved = Math.max(1, ...byDorm.map(x => x.saved));
-  const stars = s.rating ? '★★★★★'.slice(0, Math.round(s.rating.avg)).padEnd(5, '☆') : '☆☆☆☆☆';
+  const st = statsOf(ME.email);
+  const active = items.filter(i => i.owner === ME.email).length;
+  const stars = st.rating ? '★★★★★'.slice(0, Math.round(st.rating.avg)).padEnd(5, '☆') : '☆☆☆☆☆';
+  const userIds = new Map(getUsers().map(u => [u.email, u.name]));
+  const nameOf = e => userIds.get(e) || '—';
+  const hist = getLog().filter(e => e.who === ME.email || e.owner === ME.email || e.to === ME.email || e.from === ME.email)
+    .filter(e => e.type !== 'post').slice(-12).reverse();
+  const line = e => {
+    const mine = e.who === ME.email || e.from === ME.email;
+    if (e.type === 'borrow') return mine ? ['📥', `Взяли во временное пользование «${e.item}»`, `у ${nameOf(e.owner)}`] : ['📤', `Передали «${e.item}»`, `${nameOf(e.who)}`];
+    if (e.type === 'return') return mine ? ['✅', `Вернули «${e.item}»`, e.onTime ? 'в срок' : 'с опозданием'] : ['✅', `Вам вернули «${e.item}»`, e.onTime ? 'в срок' : 'с опозданием'];
+    if (e.type === 'service') return mine ? ['📨', `Заявка на услугу «${e.item}»`, `исполнитель: ${nameOf(e.owner)}`] : ['🤝', `Заявка на вашу услугу «${e.item}»`, `от ${nameOf(e.who)}`];
+    if (e.type === 'rate') return mine ? ['⭐', `Вы оценили обмен «${e.item}»`, '★'.repeat(e.stars)] : ['⭐', `Вас оценили за «${e.item}»`, '★'.repeat(e.stars)];
+    return null;
+  };
   $('#view').innerHTML = `
   <div class="page">
     <div class="profile-hero">
       <span class="avatar big">${initials(ME.name)}</span>
-      <div>
+      <div style="flex:1">
         <h1 style="margin:0;color:#fff">${esc(ME.name)}</h1>
         <p>🏠 ${esc(dormName(ME.bld))}${ME.room ? ' · комн. ' + esc(ME.room) : ''}</p>
-        <p class="hero-stars">${stars} <small>${s.rating ? s.rating.avg.toFixed(1) + ' · ' + s.rating.n + ' ' + plural(s.rating.n, 'оценка', 'оценки', 'оценок') : 'пока нет оценок'}</small></p>
+        <p class="hero-stars">${stars} <small>${st.rating ? st.rating.avg.toFixed(1) + ' · ' + st.rating.n + ' ' + plural(st.rating.n, 'оценка', 'оценки', 'оценок') : 'оценок пока нет'}</small></p>
       </div>
+      <button class="btn hero-btn" id="editProfile">✎ Редактировать</button>
     </div>
 
     <div class="tiles">
-      <div class="tile"><span>💰</span><b data-count="${s.saved}" data-suffix=" ₽">0 ₽</b><small>сэкономлено</small></div>
-      <div class="tile"><span>📥</span><b data-count="${s.borrowed}">0</b><small>взял на время</small></div>
-      <div class="tile"><span>📤</span><b data-count="${s.lent}">0</b><small>одолжил соседям</small></div>
-      <div class="tile"><span>🤝</span><b data-count="${s.helped}">0</b><small>раз помог услугой</small></div>
+      <div class="tile"><span>📦</span><b>${active}</b><small>активных объявлений</small></div>
+      <div class="tile"><span>📥</span><b>${st.borrowed}</b><small>взято во временное пользование</small></div>
+      <div class="tile"><span>📤</span><b>${st.lent}</b><small>передано соседям</small></div>
+      <div class="tile"><span>🤝</span><b>${st.helped}</b><small>оказано услуг</small></div>
     </div>
 
-    <h2 class="sec">Достижения <small class="meta">${have.length} из ${ACHIEVEMENTS.length}</small></h2>
-    <div class="achs">${ACHIEVEMENTS.map((a, i) => `
-      <div class="ach ${have.includes(a.id) ? 'got' : ''}" style="animation-delay:${i * 50}ms">
-        <span>${a.icon}</span><div><b>${a.name}</b><small>${a.desc}</small></div>${have.includes(a.id) ? '<em>✓</em>' : '<em class="lock">🔒</em>'}
-      </div>`).join('')}</div>
-
-    <h2 class="sec">Экономия по общежитиям</h2>
-    <div class="group" style="padding:16px 18px">
-      ${byDorm.some(x => x.saved) ? byDorm.sort((a, b) => b.saved - a.saved).map(x => `
-        <div class="dbar ${x.d.id === ME.bld ? 'me' : ''}"><span>${esc(dormName(x.d.id))}</span>
-          <div class="track"><i style="width:${Math.round(x.saved / maxSaved * 100)}%"></i></div><b>${x.saved.toLocaleString('ru-RU')} ₽</b></div>`).join('')
-        : '<p class="meta">Пока нет обменов. Когда соседи начнут брать вещи друг у друга, здесь появится рейтинг общежитий 🏆</p>'}
+    <div class="prof-grid">
+      <section>
+        <h2 class="sec">Контактные данные</h2>
+        <div class="info-card">
+          <div><small>Имя</small><b>${esc(ME.name)}</b></div>
+          <div><small>Логин</small><b>${esc(ME.login || ME.email)}</b></div>
+          <div><small>Общежитие</small><b>${esc(dormName(ME.bld))}</b></div>
+          <div><small>Комната</small><b>${ME.room ? esc(ME.room) : '<span class="meta">не указана</span>'}</b></div>
+          <div><small>Telegram</small><b>${ME.tg ? esc(ME.tg) : '<span class="meta">не указан</span>'}</b></div>
+        </div>
+      </section>
+      <section>
+        <h2 class="sec">История обменов</h2>
+        <div class="info-card hist">
+          ${hist.map(line).filter(Boolean).map((l, i) => `<div class="h-row"><span>${l[0]}</span><div><b>${esc(l[1])}</b><small>${esc(l[2])} · ${new Date(hist[i].at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</small></div></div>`).join('')
+            || '<p class="meta" style="padding:6px 2px">Операций пока не было.</p>'}
+        </div>
+      </section>
     </div>
   </div>`;
-  $$('#view [data-count]').forEach(el => {
-    const target = +el.dataset.count, suf = el.dataset.suffix || '', t0 = performance.now();
-    (function tick(tm) {
-      const p = Math.min(1, (tm - t0) / 1200), e = 1 - Math.pow(1 - p, 3);
-      el.textContent = Math.round(target * e).toLocaleString('ru-RU') + suf;
-      if (p < 1) requestAnimationFrame(tick);
-    })(t0);
+  $('#editProfile').addEventListener('click', openProfileEdit);
+}
+
+function openProfileEdit() {
+  openModal(`
+    <div class="m-body">
+      <div class="toprow" style="margin-bottom:10px"><h3 style="margin:0">Редактирование профиля</h3><button class="btn sm m-x">✕</button></div>
+      <form class="form" id="profForm">
+        <label><span>Имя и фамилия</span><input class="ctl" name="fullname" maxlength="60" required value="${esc(ME.name)}"></label>
+        <div class="row2">
+          <label><span>Комната</span><input class="ctl" name="room" maxlength="6" inputmode="numeric" value="${esc(ME.room || '')}"></label>
+          <label><span>Telegram</span><input class="ctl" name="tg" maxlength="40" placeholder="@username" value="${esc(ME.tg || '')}"></label>
+        </div>
+        <p class="meta">Общежитие меняется в меню профиля → «Сменить общежитие».</p>
+        <div class="m-actions"><button type="button" class="btn m-cancel">Отмена</button><button class="btn primary">Сохранить</button></div>
+      </form>
+    </div>`);
+  $('.m-x').addEventListener('click', closeModal);
+  $('.m-cancel').addEventListener('click', closeModal);
+  $('#profForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const f = e.target, name = f.fullname.value.trim();
+    if (name.length < 2) { f.fullname.focus(); return; }
+    let tg = f.tg.value.trim(); if (tg && !tg.startsWith('@')) tg = '@' + tg;
+    const room = f.room.value.trim();
+    const users = getUsers(), u = users.find(x => x.email === ME.email);
+    Object.assign(u, { name, room, tg }); Object.assign(ME, { name, room, tg }); saveUsers(users);
+    items.forEach(it => { if (it.owner === ME.email) Object.assign(it, { ownerName: name, room, tg }); if (it.borrower === ME.email) it.borrowerName = name; });
+    persist(); closeModal();
+    $('#avatar').textContent = initials(name); $('#umName').textContent = name; $('#umRoom').textContent = where();
+    route();
+    toast('✓', 'Профиль сохранён');
   });
-  requestAnimationFrame(() => $$('.dbar i').forEach(i => { const w = i.style.width; i.style.width = '0'; requestAnimationFrame(() => i.style.width = w); }));
 }
 
 /* тёмная тема */

@@ -50,7 +50,7 @@
 #authScreen .brand img { width: 104px; height: 104px; filter: drop-shadow(0 10px 18px rgba(20,56,240,.25)); }
 #authScreen .auth-root.loaded .brand img { animation: logoIn 1s cubic-bezier(.2,.9,.3,1.3) .2s both; }
 @keyframes logoIn { from { opacity: 0; transform: rotate(-200deg) scale(.4); } }
-#authScreen .brand b { display: block; font-size: 40px; font-weight: 800; letter-spacing: .5px; color: #3a4049; line-height: 1; }
+#authScreen .brand b { display: block; font-size: 34px; white-space: nowrap; font-weight: 800; letter-spacing: .5px; color: #3a4049; line-height: 1; }
 #authScreen .brand small { display: block; font-size: 16px; font-weight: 600; letter-spacing: 1.2px; color: #3a4049; text-transform: uppercase; margin-top: 6px; }
 #authScreen .auth-root.loaded .brand div { animation: slideIn .8s ease .45s both; }
 @keyframes slideIn { from { opacity: 0; transform: translateX(-16px); } }
@@ -161,7 +161,7 @@
   #authScreen .card { padding: 38px 22px 20px; }
   #authScreen .brand { margin-bottom: 30px; }
   #authScreen .brand img { width: 70px; height: 70px; }
-  #authScreen .brand b { font-size: 28px; }
+  #authScreen .brand b { font-size: 22px; }
   #authScreen .brand small { font-size: 12px; }
   #authScreen .dorm-list { grid-template-columns: 1fr; }
   #authScreen .inp { font-size: 14.5px; padding: 0 12px; }

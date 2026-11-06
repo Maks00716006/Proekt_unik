@@ -160,8 +160,8 @@ function logout() {
 }
 
 /* ===== объявления ===== */
-function seedItems() {
-  const me = DEMO_USER;
+/* примеры объявлений; me — пользователь, для которого создаются займы */
+function seedItems(me = DEMO_USER) {
   const N = (name, bld, room, tg) => ({ ownerName: name, owner: tg + '@n', bld: DORM_BY_TG[tg] || 'm1', room, tg });
   let id = 1;
   const mk = (o) => Object.assign({
@@ -195,10 +195,12 @@ function seedItems() {
       ...N('Никита Орлов', '4', '220', '@nik_orlov'), uses: 7 }),
     mk({ type: 'thing', title: 'Палатка на 3 человек', cat: 'Спорт и отдых', emoji: '⛺',
       desc: 'Для выездов на природу. Возвращать сухой, пожалуйста :)',
-      owner: me.email, ownerName: me.name, bld: me.bld, room: me.room, tg: me.tg, uses: 3 }),
+      owner: me.email, ownerName: me.name, bld: me.bld, room: me.room, tg: me.tg, uses: 3,
+      status: 'busy', borrower: 'z@n', borrowerName: 'Алина Е.', from: iso(addDays(-2)), to: iso(addDays(3)) }),
     mk({ type: 'thing', title: 'Инженерный калькулятор Casio', cat: 'Учёба', emoji: '🧮',
       desc: 'fx-991. Разрешён на экзаменах по матану и физике.',
-      ...N('Ольга Смирнова', '1', '207', '@olga_sm'), uses: 15 }),
+      ...N('Ольга Смирнова', '1', '207', '@olga_sm'), uses: 15,
+      status: 'busy', borrower: me.email, borrowerName: me.name, from: iso(addDays(-9)), to: iso(addDays(-2)) }),
     mk({ type: 'thing', title: 'Учебник Демидовича (задачник)', cat: 'Учёба', emoji: '📕',
       desc: 'Сборник задач по матанализу. Без пометок.',
       ...N('Егор Васильев', '3', '102', '@egor_v'), uses: 4,

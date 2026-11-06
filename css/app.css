@@ -282,8 +282,6 @@ body, #appScreen .card, #appScreen .group, #appScreen .ctl, #appScreen .btn, #ap
 /* мини-рейтинг на карточке */
 #appScreen .stars-mini { color: #c98a00; font-weight: 600; }
 
-/* конфетти */
-.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 200; }
 
 /* звёзды оценки */
 #appScreen .rate { display: inline-flex; gap: 6px; }
@@ -304,30 +302,35 @@ body, #appScreen .card, #appScreen .group, #appScreen .ctl, #appScreen .btn, #ap
 #appScreen .tile span { font-size: 24px; }
 #appScreen .tile b { font-size: 28px; font-weight: 800; letter-spacing: -.5px; }
 #appScreen .tile small { color: var(--muted); }
-#appScreen .achs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-#appScreen .ach { display: flex; gap: 12px; align-items: center; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); opacity: .55; filter: grayscale(1); animation: cardIn .4s ease both; }
-#appScreen .ach.got { opacity: 1; filter: none; border-color: #c5d1ff; box-shadow: 0 6px 18px rgba(20,56,240,.10); }
-#appScreen .ach > span { font-size: 28px; width: 50px; height: 50px; border-radius: 14px; background: var(--blue-l); display: grid; place-items: center; flex: none; }
-#appScreen .ach b { display: block; }
-#appScreen .ach small { color: var(--muted); font-size: 13px; }
-#appScreen .ach em { margin-left: auto; font-style: normal; color: var(--green); font-weight: 800; }
-#appScreen .ach em.lock { filter: none; opacity: .7; }
-#appScreen .dbar { display: grid; grid-template-columns: 190px 1fr 110px; gap: 12px; align-items: center; padding: 6px 0; font-size: 14px; }
-#appScreen .dbar .track { height: 10px; background: var(--line); border-radius: 6px; overflow: hidden; }
-#appScreen .dbar i { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, #36e2fa, #1438f0); transition: width 1s cubic-bezier(.2,.9,.3,1); }
-#appScreen .dbar b { text-align: right; }
-#appScreen .dbar.me span { font-weight: 700; color: var(--link); }
 @media (max-width: 900px) {
   #appScreen .tiles { grid-template-columns: 1fr 1fr; }
-  #appScreen .achs { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 600px) {
-  #appScreen .achs { grid-template-columns: 1fr; }
   #appScreen .profile-hero { flex-direction: column; text-align: center; padding: 24px 16px; }
-  #appScreen .dbar { grid-template-columns: 1fr 80px; }
-  #appScreen .dbar .track { grid-column: span 2; order: 3; }
+  #appScreen .prof-grid { grid-template-columns: 1fr; }
+  #appScreen .hero-btn { align-self: center; }
 }
 
 /* аватар в шапке всегда тёмными буквами на белом */
 #appScreen .topbar .avatar, #appScreen .profile-hero .avatar { color: #1d2125; }
 #appScreen .profile-hero .avatar.big { color: #1438f0; }
+
+/* профиль: данные и история */
+#appScreen .hero-btn { align-self: flex-start; background: rgba(255,255,255,.15); color: #fff; border-color: rgba(255,255,255,.35); position: relative; z-index: 1; }
+#appScreen .hero-btn:hover { background: rgba(255,255,255,.25); }
+#appScreen .tile b { font-size: 28px; }
+#appScreen .prof-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 20px; }
+#appScreen .info-card { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 6px 18px; }
+#appScreen .info-card > div { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+#appScreen .info-card > div:last-child { border-bottom: 0; }
+#appScreen .info-card small { color: var(--muted); }
+#appScreen .info-card.hist > .h-row { justify-content: flex-start; align-items: center; }
+#appScreen .h-row > span { font-size: 20px; width: 38px; height: 38px; border-radius: 10px; background: var(--blue-l); display: grid; place-items: center; flex: none; }
+#appScreen .h-row b { display: block; font-weight: 500; }
+#appScreen .h-row small { display: block; }
+
+/* значок уведомления */
+#appScreen .toast > span:first-child { width: 22px; height: 22px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 13px !important; font-weight: 800; display: grid; place-items: center; flex: none; margin-top: 1px; }
+@media (max-width: 900px) { #appScreen .prof-grid { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { #appScreen .hero-btn { align-self: center; } #appScreen .tile b { font-size: 24px; } }
+#appScreen .about-hero p + p { margin-top: 12px; }
