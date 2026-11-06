@@ -187,7 +187,7 @@ function cardHtml(it, opts = {}) {
           <svg width="16" height="12" viewBox="0 0 20 14" fill="#6a737b"><circle cx="6" cy="4" r="3"/><circle cx="14" cy="4" r="3"/><path d="M0 13c0-3 2.7-5 6-5s6 2 6 5zM10 13c.3-2.3 1.6-4 4-4 3.3 0 6 2 6 4z"/></svg>${it.uses}</span>
         <button class="kebab" data-menu="${it.id}" aria-label="Действия">⋮</button>
       </div>
-      <div class="meta">${mine ? t('mine') : esc(it.ownerName)} / ${esc(dormName(it.bld))}${it.room ? ' · ' + t('room') + ' ' + esc(it.room) : ''}</div>
+      <div class="meta">${mine ? t('mine') : esc(it.ownerName)}${ratingOf(it.owner) ? ` <span class="stars-mini">★ ${ratingOf(it.owner).avg.toFixed(1)}</span>` : ''} / ${esc(dormName(it.bld))}${it.room ? ' · ' + t('room') + ' ' + esc(it.room) : ''}</div>
       <div class="meta">${esc(it.cat)}</div>
       <div class="foot">${foot}</div>
       ${extra}${actions}
@@ -221,7 +221,7 @@ function bindCards(root) {
   $$('[data-act]', root).forEach(b => b.addEventListener('click', e => {
     e.stopPropagation();
     const id = b.closest('.card').dataset.id;
-    ({ ret: returnItem, remind: remindBorrower, del: deleteItem, take: openItem })[b.dataset.act](id);
+    ({ ret: returnItem, remind: remindBorrower, del: deleteItem, take: openItem, ics: downloadIcs })[b.dataset.act](id);
   }));
 }
 
@@ -378,7 +378,7 @@ function pageLoans() {
     </div>
     ${rem.map(r => `<div class="alert ${r.lvl}"><span class="ai">${r.lvl === 'red' ? '⚠️' : '⏰'}</span><div class="grow"><b>${esc(r.text)}</b><div class="meta" style="color:inherit;opacity:.8">${esc(r.sub)}</div></div></div>`).join('')}
     <section class="group"><div class="group-h"><span class="chev">▼</span><b>📥 Я взял на время</b><span class="tag blue">Нужно вернуть</span><span class="pill">${took.length}</span></div>
-      ${took.length ? `<div class="grid">${took.map((it, i) => cardHtml(it, { i, loan: true, actions: `<button class="btn sm success" data-act="ret">✓ Я вернул</button>` })).join('')}</div>`
+      ${took.length ? `<div class="grid">${took.map((it, i) => cardHtml(it, { i, loan: true, actions: `<button class="btn sm" data-act="ics" title="Добавить напоминание в календарь телефона">📅 В календарь</button><button class="btn sm success" data-act="ret">✓ Я вернул</button>` })).join('')}</div>`
         : `<div class="empty"><div class="big">🙌</div>Ты ничего не должен соседям. <a href="#catalog">Найти вещь в каталоге</a></div>`}
     </section>
     <section class="group"><div class="group-h"><span class="chev">▼</span><b>📤 У меня взяли</b><span class="pill">${lent.length}</span></div>
@@ -457,7 +457,7 @@ function openItem(id) {
   } else if (iBorrow) {
     const p = loanProgress(it);
     action = `<p><span class="badge ${p.bcls}">${p.label}</span> &nbsp;Вернуть до <b>${fmtDate(it.to)}</b></p>
-      <div class="m-actions"><button class="btn success" id="retBtn">✓ Я вернул</button></div>`;
+      <div class="m-actions"><button class="btn" id="icsBtn">📅 В календарь</button><button class="btn success" id="retBtn">✓ Я вернул</button></div>`;
   } else if (it.status === 'busy') {
     action = `<p class="meta">Сейчас у: <b>${esc(it.borrowerName)}</b> до ${fmtDate(it.to)}.${mine ? '' : ' Загляни позже или поищи похожее.'}</p>
       ${mine ? `<div class="m-actions"><button class="btn" id="remBtn">🔔 Напомнить</button><button class="btn success" id="retBtn">✓ Мне вернули</button></div>` : ''}`;
@@ -484,7 +484,8 @@ function openItem(id) {
     </div>`);
 
   $('.m-cancel')?.addEventListener('click', closeModal);
-  $('#retBtn')?.addEventListener('click', () => { returnItem(id); closeModal(); });
+  $('#retBtn')?.addEventListener('click', () => { closeModal(); returnItem(id); });
+  $('#icsBtn')?.addEventListener('click', () => downloadIcs(id));
   $('#remBtn')?.addEventListener('click', () => remindBorrower(id));
   $('#delBtn')?.addEventListener('click', () => { closeModal(); deleteItem(id); });
   const f = $('#actForm');
@@ -496,13 +497,16 @@ function openItem(id) {
   f.addEventListener('submit', e => {
     e.preventDefault();
     if (it.type === 'service') {
-      it.uses++; persist(); closeModal();
+      it.uses++; logEvent({ type: 'service', who: ME.email, owner: it.owner, item: it.title, price: priceOf(it) });
+      persist(); closeModal(); checkAchievements();
       toast('📨', 'Заявка отправлена', ` ${it.ownerName.split(' ')[0]} получит сообщение и свяжется с тобой (${it.tg}).`);
     } else {
       const to = f.to.value;
       if (!to || daysUntil(to) < 1) { toast('⚠️', 'Выбери дату возврата не раньше завтра'); return; }
       Object.assign(it, { status: 'busy', borrower: ME.email, borrowerName: ME.name, from: iso(today()), to });
-      it.uses++; persist(); closeModal(); route();
+      it.uses++; logEvent({ type: 'borrow', who: ME.email, owner: it.owner, item: it.title, price: priceOf(it) });
+      persist(); closeModal(); route(); confetti();
+      setTimeout(checkAchievements, 900);
       toast('🎉', 'Вещь твоя до ' + fmtDate(to), ` Забрать: ${it.ownerName.split(' ')[0]}, ${dormName(it.bld)}${it.room ? ', комн. ' + it.room : ''}. Напомним о возврате!`);
     }
   });
@@ -527,6 +531,8 @@ function openNew(type) {
           <label><span>Контакт (Telegram)</span><input class="ctl" name="tg" value="${esc(ME.tg || '')}" placeholder="@username"></label>
         </div>
         <label><span>Описание</span><textarea class="ctl" name="desc" maxlength="400" placeholder="Состояние, комплектация, условия"></textarea></label>
+        <label><span>${type === 'thing' ? 'Сколько стоит новая, ₽' : 'Сколько стоила бы у мастера, ₽'} <small class="meta">(для подсчёта экономии)</small></span>
+          <input class="ctl" name="price" type="number" min="0" max="500000" step="100" placeholder="${DEFAULT_PRICE[cats[0]]}"></label>
         <label><span>Иконка</span><div class="emoji-pick">${emojis.map((e, i) => `<button type="button" class="${i === 0 ? 'on' : ''}">${e}</button>`).join('')}</div></label>
         <div class="m-actions"><button type="button" class="btn m-cancel">Отмена</button><button class="btn primary">Опубликовать</button></div>
       </form>
@@ -552,12 +558,15 @@ function openNew(type) {
     }
     items.unshift({
       id: 'u' + Date.now(), type, title, cat: f.cat.value, emoji,
+      price: Math.max(0, Math.round(+f.price.value || DEFAULT_PRICE[f.cat.value] || 1000)),
       desc: f.desc.value.trim() || 'Без описания',
       owner: ME.email, ownerName: ME.name, bld: ME.bld, room: ME.room, tg,
       status: 'free', uses: 0, created: iso(today()) + 'T' + Date.now(), rating: null, reviews: 0
     });
+    logEvent({ type: 'post', who: ME.email, item: title });
     persist(); closeModal();
     toast('✅', 'Объявление опубликовано', ' Соседи уже могут его увидеть');
+    checkAchievements();
     location.hash === '#my' ? route() : (location.hash = 'my');
   });
 }
@@ -566,8 +575,13 @@ function openNew(type) {
 function returnItem(id) {
   const it = items.find(x => x.id === id);
   const wasMine = it.owner === ME.email;
+  const other = wasMine ? { email: it.borrower, name: it.borrowerName } : { email: it.owner, name: it.ownerName };
+  const onTime = it.to ? daysUntil(it.to) >= 0 : true;
+  logEvent({ type: 'return', who: wasMine ? it.borrower : ME.email, owner: it.owner, item: it.title, onTime });
   Object.assign(it, { status: 'free', borrower: null, borrowerName: null, from: null, to: null });
   persist(); route();
+  setTimeout(() => askRating(other, it.title), 500);
+  checkAchievements();
   toast('✅', wasMine ? 'Вещь снова у тебя' : 'Спасибо, что вернул!', wasMine ? ` «${it.title}» снова доступна соседям` : ` ${it.ownerName.split(' ')[0]} получит уведомление`);
 }
 function remindBorrower(id) {
@@ -582,8 +596,200 @@ function deleteItem(id) {
   toast('🗑', 'Объявление удалено');
 }
 
+
+/* ================= Дополнительно: статистика, достижения, оценки, календарь, тема ================= */
+const DEFAULT_PRICE = {
+  'Инструменты': 4500, 'Бытовая техника': 3500, 'Кухня': 3000, 'Спорт и отдых': 6000, 'Учёба': 1500, 'Игры': 2000,
+  'Ремонт техники': 1500, 'Помощь с учёбой': 1200, 'Красота': 800, 'Другое': 700
+};
+function priceOf(it) { return it.price || DEFAULT_PRICE[it.cat] || 1000; }
+
+function getLog() { return DB.get('log', []); }
+function logEvent(e) { const l = getLog(); l.push(Object.assign({ at: Date.now() }, e)); DB.set('log', l); }
+
+function ratingOf(email) {
+  const r = getLog().filter(e => e.type === 'rate' && e.to === email);
+  if (!r.length) return null;
+  return { avg: r.reduce((s, e) => s + e.stars, 0) / r.length, n: r.length };
+}
+
+function statsOf(email) {
+  const log = getLog();
+  const borrowed = log.filter(e => e.type === 'borrow' && e.who === email);
+  const services = log.filter(e => e.type === 'service' && e.who === email);
+  return {
+    borrowed: borrowed.length,
+    lent: log.filter(e => e.type === 'borrow' && e.owner === email).length,
+    helped: log.filter(e => e.type === 'service' && e.owner === email).length,
+    posted: log.filter(e => e.type === 'post' && e.who === email).length,
+    returnedOnTime: log.filter(e => e.type === 'return' && e.who === email && e.onTime).length,
+    saved: [...borrowed, ...services].reduce((s, e) => s + (e.price || 0), 0),
+    rating: ratingOf(email)
+  };
+}
+
+const ACHIEVEMENTS = [
+  { id: 'first_post', icon: '📦', name: 'Первый шаг', desc: 'Выложить первое объявление', ok: s => s.posted >= 1 },
+  { id: 'first_borrow', icon: '🤝', name: 'Знакомство с соседом', desc: 'Взять вещь или услугу у соседа', ok: s => s.borrowed + (s.saved && !s.borrowed ? 1 : 0) >= 1 },
+  { id: 'generous', icon: '🎁', name: 'Щедрый сосед', desc: 'Одолжить вещи 3 раза', ok: s => s.lent >= 3 },
+  { id: 'reliable', icon: '⏰', name: 'Надёжный', desc: 'Вернуть 3 вещи вовремя', ok: s => s.returnedOnTime >= 3 },
+  { id: 'saver', icon: '💰', name: 'Экономист', desc: 'Сэкономить 10 000 ₽', ok: s => s.saved >= 10000 },
+  { id: 'star', icon: '⭐', name: 'Звезда общежития', desc: 'Средняя оценка от 4.5 (мин. 3 оценки)', ok: s => s.rating && s.rating.n >= 3 && s.rating.avg >= 4.5 }
+];
+
+function checkAchievements() {
+  const s = statsOf(ME.email), key = 'ach_' + ME.email;
+  const have = DB.get(key, []);
+  const fresh = ACHIEVEMENTS.filter(a => a.ok(s) && !have.includes(a.id));
+  if (!fresh.length) return;
+  DB.set(key, [...have, ...fresh.map(a => a.id)]);
+  fresh.forEach((a, i) => setTimeout(() => { toast('🏆', 'Новое достижение: ' + a.name, ' ' + a.desc); confetti(); }, 600 + i * 900));
+}
+
+/* конфетти */
+function confetti() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = document.createElement('canvas');
+  c.className = 'confetti'; c.width = innerWidth; c.height = innerHeight;
+  document.body.appendChild(c);
+  const ctx = c.getContext('2d');
+  const colors = ['#1438f0', '#36e2fa', '#ffd25e', '#18a957', '#ff8fab', '#8775e9'];
+  const parts = Array.from({ length: 140 }, () => ({
+    x: innerWidth / 2 + (Math.random() - .5) * 200, y: innerHeight / 3,
+    vx: (Math.random() - .5) * 14, vy: Math.random() * -12 - 4,
+    s: 5 + Math.random() * 6, r: Math.random() * 6, vr: (Math.random() - .5) * .3,
+    c: colors[Math.floor(Math.random() * colors.length)]
+  }));
+  let frame = 0;
+  (function tick() {
+    ctx.clearRect(0, 0, c.width, c.height);
+    parts.forEach(p => {
+      p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+      ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); ctx.restore();
+    });
+    if (++frame < 150) requestAnimationFrame(tick); else c.remove();
+  })();
+}
+
+/* оценка после возврата */
+function askRating(other, title) {
+  if (!other.email || other.email === ME.email) return;
+  let stars = 0;
+  openModal(`
+    <div class="m-body" style="text-align:center">
+      <div style="font-size:44px">🤝</div>
+      <h3>Как прошёл обмен?</h3>
+      <p class="meta" style="margin:4px 0 14px">Оцени соседа: <b>${esc(other.name || '')}</b> · «${esc(title)}»</p>
+      <div class="rate" id="rate">${[1, 2, 3, 4, 5].map(n => `<button type="button" data-n="${n}" aria-label="${n}">★</button>`).join('')}</div>
+      <p class="meta" id="rateTxt" style="min-height:20px;margin-top:6px"></p>
+      <div class="m-actions" style="justify-content:center"><button class="btn m-cancel">Пропустить</button><button class="btn primary" id="rateSend" disabled>Оценить</button></div>
+    </div>`);
+  const words = ['', 'Плохо 😕', 'Так себе', 'Нормально', 'Хорошо 🙂', 'Отлично! 🔥'];
+  const paint = n => $$('#rate button').forEach(b => b.classList.toggle('on', +b.dataset.n <= n));
+  $$('#rate button').forEach(b => {
+    b.addEventListener('mouseenter', () => paint(+b.dataset.n));
+    b.addEventListener('mouseleave', () => paint(stars));
+    b.addEventListener('click', () => { stars = +b.dataset.n; paint(stars); $('#rateTxt').textContent = words[stars]; $('#rateSend').disabled = false; });
+  });
+  $('.m-cancel').addEventListener('click', closeModal);
+  $('#rateSend').addEventListener('click', () => {
+    logEvent({ type: 'rate', from: ME.email, to: other.email, stars, item: title });
+    closeModal(); route();
+    toast('⭐', 'Спасибо за оценку!', ' Так соседи понимают, кому можно доверять');
+    if (stars === 5) confetti();
+  });
+}
+
+/* напоминание в календарь (.ics — открывается в Google/Apple/Outlook календаре) */
+function downloadIcs(id) {
+  const it = items.find(x => x.id === id);
+  if (!it || !it.to) return;
+  const d = it.to.replace(/-/g, ''), stamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const ics = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Sosedi//RU', 'BEGIN:VEVENT',
+    `UID:${it.id}-${d}@sosedi`, `DTSTAMP:${stamp}`,
+    `DTSTART:${d}T100000`, `DTEND:${d}T103000`,
+    `SUMMARY:Вернуть «${it.title}»`,
+    `DESCRIPTION:Владелец: ${it.ownerName}\\, ${dormName(it.bld)}${it.room ? '\\, комн. ' + it.room : ''}. Сервис «Соседи».`,
+    'BEGIN:VALARM', 'TRIGGER:-P1D', 'ACTION:DISPLAY', 'DESCRIPTION:Завтра вернуть вещь соседу', 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR'
+  ].join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+  a.download = 'vernut-' + it.id + '.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('📅', 'Напоминание скачано', ' Открой файл — событие добавится в календарь с оповещением за день');
+}
+
+/* страница профиля */
+function pageProfile() {
+  const s = statsOf(ME.email), have = DB.get('ach_' + ME.email, []);
+  const log = getLog();
+  const byDorm = DORMS.map(d => {
+    const members = new Set(getUsers().filter(u => u.bld === d.id).map(u => u.email));
+    const saved = log.filter(e => (e.type === 'borrow' || e.type === 'service') && members.has(e.who)).reduce((a, e) => a + (e.price || 0), 0);
+    return { d, saved };
+  });
+  const maxSaved = Math.max(1, ...byDorm.map(x => x.saved));
+  const stars = s.rating ? '★★★★★'.slice(0, Math.round(s.rating.avg)).padEnd(5, '☆') : '☆☆☆☆☆';
+  $('#view').innerHTML = `
+  <div class="page">
+    <div class="profile-hero">
+      <span class="avatar big">${initials(ME.name)}</span>
+      <div>
+        <h1 style="margin:0;color:#fff">${esc(ME.name)}</h1>
+        <p>🏠 ${esc(dormName(ME.bld))}${ME.room ? ' · комн. ' + esc(ME.room) : ''}</p>
+        <p class="hero-stars">${stars} <small>${s.rating ? s.rating.avg.toFixed(1) + ' · ' + s.rating.n + ' ' + plural(s.rating.n, 'оценка', 'оценки', 'оценок') : 'пока нет оценок'}</small></p>
+      </div>
+    </div>
+
+    <div class="tiles">
+      <div class="tile"><span>💰</span><b data-count="${s.saved}" data-suffix=" ₽">0 ₽</b><small>сэкономлено</small></div>
+      <div class="tile"><span>📥</span><b data-count="${s.borrowed}">0</b><small>взял на время</small></div>
+      <div class="tile"><span>📤</span><b data-count="${s.lent}">0</b><small>одолжил соседям</small></div>
+      <div class="tile"><span>🤝</span><b data-count="${s.helped}">0</b><small>раз помог услугой</small></div>
+    </div>
+
+    <h2 class="sec">Достижения <small class="meta">${have.length} из ${ACHIEVEMENTS.length}</small></h2>
+    <div class="achs">${ACHIEVEMENTS.map((a, i) => `
+      <div class="ach ${have.includes(a.id) ? 'got' : ''}" style="animation-delay:${i * 50}ms">
+        <span>${a.icon}</span><div><b>${a.name}</b><small>${a.desc}</small></div>${have.includes(a.id) ? '<em>✓</em>' : '<em class="lock">🔒</em>'}
+      </div>`).join('')}</div>
+
+    <h2 class="sec">Экономия по общежитиям</h2>
+    <div class="group" style="padding:16px 18px">
+      ${byDorm.some(x => x.saved) ? byDorm.sort((a, b) => b.saved - a.saved).map(x => `
+        <div class="dbar ${x.d.id === ME.bld ? 'me' : ''}"><span>${esc(dormName(x.d.id))}</span>
+          <div class="track"><i style="width:${Math.round(x.saved / maxSaved * 100)}%"></i></div><b>${x.saved.toLocaleString('ru-RU')} ₽</b></div>`).join('')
+        : '<p class="meta">Пока нет обменов. Когда соседи начнут брать вещи друг у друга, здесь появится рейтинг общежитий 🏆</p>'}
+    </div>
+  </div>`;
+  $$('#view [data-count]').forEach(el => {
+    const target = +el.dataset.count, suf = el.dataset.suffix || '', t0 = performance.now();
+    (function tick(tm) {
+      const p = Math.min(1, (tm - t0) / 1200), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * e).toLocaleString('ru-RU') + suf;
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  });
+  requestAnimationFrame(() => $$('.dbar i').forEach(i => { const w = i.style.width; i.style.width = '0'; requestAnimationFrame(() => i.style.width = w); }));
+}
+
+/* тёмная тема */
+function applyTheme(th) {
+  document.documentElement.dataset.theme = th;
+  const b = $('#themeBtn');
+  if (b) b.textContent = th === 'dark' ? '☀️' : '🌙';
+}
+applyTheme(DB.get('theme', 'light'));
+$('#themeBtn').addEventListener('click', () => {
+  const th = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  DB.set('theme', th); applyTheme(th);
+});
+
 /* ---------- роутер ---------- */
-const PAGES = { catalog: pageCatalog, my: pageMy, loans: pageLoans, about: pageAbout };
+const PAGES = { catalog: pageCatalog, my: pageMy, loans: pageLoans, profile: pageProfile, about: pageAbout };
 function route() {
   const r = location.hash.slice(1) || 'catalog';
   (PAGES[r] || pageCatalog)();

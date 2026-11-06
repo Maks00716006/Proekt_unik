@@ -23,12 +23,14 @@
   --orange: #f7782b;
   --green: #18a957;
   --radius: 8px;
+  --bg: #fff;
+  --surface: #fff;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  color: var(--text); background: #fff; font-size: 15px;
+  color: var(--text); background: var(--surface); font-size: 15px;
   -webkit-font-smoothing: antialiased;
   border-top: 5px solid #2b2f36;
 }
@@ -64,7 +66,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 #appScreen .avatar-btn { display: flex; align-items: center; gap: 6px; background: none; border: 0; cursor: pointer; }
 #appScreen .avatar { width: 34px; height: 34px; border-radius: 50%; background: #fff; color: var(--text); display: grid; place-items: center; font-size: 13px; font-weight: 600; }
 #appScreen .bell-wrap, #appScreen .user-wrap { position: relative; }
-#appScreen .dropdown { position: absolute; right: 0; top: calc(100% + 10px); background: #fff; color: var(--text); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,.14); width: 320px; padding: 6px; animation: dd .18s ease; z-index: 30; }
+#appScreen .dropdown { position: absolute; right: 0; top: calc(100% + 10px); background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,.14); width: 320px; padding: 6px; animation: dd .18s ease; z-index: 30; }
 @keyframes dd { from { opacity: 0; transform: translateY(-6px); } }
 #appScreen .user-menu { width: 230px; }
 #appScreen .um-head { padding: 10px 12px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
@@ -89,12 +91,12 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 #appScreen .toprow { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
 #appScreen .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
-#appScreen .seg button { border: 0; background: #fff; padding: 9px 20px; cursor: pointer; color: var(--muted); font-size: 14.5px; border-right: 1px solid var(--line); }
+#appScreen .seg button { border: 0; background: var(--surface); padding: 9px 20px; cursor: pointer; color: var(--muted); font-size: 14.5px; border-right: 1px solid var(--line); }
 #appScreen .seg button:last-child { border-right: 0; }
 #appScreen .seg button.on { background: var(--blue); color: #fff; }
 #appScreen .seg button:not(.on):hover { background: var(--panel); }
 #appScreen .pill { display: inline-flex; align-items: center; gap: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 12px; color: var(--muted); }
-#appScreen .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 6px; border: 1px solid var(--line); background: #fff; padding: 8px 14px; cursor: pointer; font-size: 14px; color: var(--muted); transition: background .15s, transform .1s; white-space: nowrap; }
+#appScreen .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; cursor: pointer; font-size: 14px; color: var(--muted); transition: background .15s, transform .1s; white-space: nowrap; }
 #appScreen .btn:hover { background: var(--panel); }
 #appScreen .btn:active { transform: scale(.97); }
 #appScreen .btn.sm { padding: 5px 10px; font-size: 12.5px; }
@@ -107,8 +109,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 #appScreen .filters { display: grid; grid-template-columns: 190px 190px 150px 1fr 190px 140px auto; gap: 10px; align-items: end; margin-bottom: 14px; }
 #appScreen .filters label { display: block; font-size: 14px; }
 #appScreen .filters label > span { display: block; margin-bottom: 6px; }
-#appScreen .ctl { width: 100%; height: 38px; border: 1px solid var(--line); border-radius: 6px; padding: 0 12px; background: #fff; font-size: 14px; outline: none; }
-#appScreen select.ctl { appearance: none; padding-right: 28px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14'%3E%3Cpath d='M2 5l3-3 3 3M2 9l3 3 3-3' stroke='%23333' stroke-width='1.4' fill='none'/%3E%3C/svg%3E") no-repeat right 10px center; cursor: pointer; }
+#appScreen .ctl { width: 100%; height: 38px; border: 1px solid var(--line); border-radius: 6px; padding: 0 12px; background: var(--surface); font-size: 14px; outline: none; }
+#appScreen select.ctl { appearance: none; padding-right: 28px; background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14'%3E%3Cpath d='M2 5l3-3 3 3M2 9l3 3 3-3' stroke='%23333' stroke-width='1.4' fill='none'/%3E%3C/svg%3E") no-repeat right 10px center; cursor: pointer; }
 #appScreen .ctl:focus { border-color: #8fa3ff; box-shadow: 0 0 0 3px rgba(20,56,240,.15); }
 #appScreen .filter-btns { display: flex; }
 #appScreen .filter-btns .btn { height: 38px; }
@@ -121,14 +123,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
 #appScreen .group-h .chev { transition: transform .2s; font-size: 11px; color: var(--muted); }
 #appScreen .group.closed .chev { transform: rotate(-90deg); }
 #appScreen .group-h b { font-weight: 600; }
-#appScreen .group-h .pill { margin-left: auto; background: #fff; }
-#appScreen .tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #fff3cd; color: #8a6100; border: 1px solid #f5d77a; }
+#appScreen .group-h .pill { margin-left: auto; background: var(--surface); }
+#appScreen .tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--surface)3cd; color: #8a6100; border: 1px solid #f5d77a; }
 #appScreen .tag.blue { background: var(--blue-l); color: var(--blue); border-color: #c5d1ff; }
 #appScreen .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 12px; padding: 0 12px 12px; }
 #appScreen .group.closed .grid { display: none; }
 
 /* карточка */
-#appScreen .card { position: relative; display: grid; grid-template-columns: 112px 1fr; min-height: 144px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: box-shadow .2s, transform .2s; animation: cardIn .4s ease both; }
+#appScreen .card { position: relative; display: grid; grid-template-columns: 112px 1fr; min-height: 144px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: box-shadow .2s, transform .2s; animation: cardIn .4s ease both; }
 #appScreen .card:hover { box-shadow: 0 8px 24px rgba(16, 24, 64, .12); transform: translateY(-2px); }
 @keyframes cardIn { from { opacity: 0; transform: translateY(10px); } }
 #appScreen .cover { position: relative; background-size: 160px 160px; display: grid; place-items: center; }
@@ -151,7 +153,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 #appScreen .bar { height: 4px; background: #e9ecef; border-radius: 2px; overflow: hidden; width: 100%; max-width: 160px; }
 #appScreen .bar i { display: block; height: 100%; border-radius: 2px; background: var(--yellow); transition: width .8s ease; }
 #appScreen .card-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-#appScreen .menu-pop { position: absolute; right: 8px; top: 34px; z-index: 5; width: 190px; padding: 4px; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 10px 24px rgba(0,0,0,.14); }
+#appScreen .menu-pop { position: absolute; right: 8px; top: 34px; z-index: 5; width: 190px; padding: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 10px 24px rgba(0,0,0,.14); }
 #appScreen .menu-pop button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 13.5px; }
 #appScreen .menu-pop button:hover { background: var(--panel); }
 
@@ -161,7 +163,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* баннер напоминаний */
 #appScreen .alert { display: flex; gap: 14px; align-items: center; padding: 14px 16px; border-radius: var(--radius); margin-bottom: 14px; border: 1px solid; animation: pageIn .4s ease; }
 #appScreen .alert.red { background: #fdecee; border-color: #f6c1c8; color: #8d1324; }
-#appScreen .alert.yellow { background: #fff8e1; border-color: #f5d77a; color: #6b4f00; }
+#appScreen .alert.yellow { background: var(--surface)8e1; border-color: #f5d77a; color: #6b4f00; }
 #appScreen .alert .ai { font-size: 24px; }
 #appScreen .alert .grow { flex: 1; }
 
@@ -171,7 +173,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 #appScreen .about-hero p { opacity: .9; max-width: 720px; line-height: 1.6; font-size: 16px; }
 #appScreen .about-hero::after { content: ''; position: absolute; right: -60px; top: -60px; width: 300px; height: 300px; border-radius: 50%; background: rgba(255,255,255,.08); }
 #appScreen .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 18px; }
-#appScreen .step { border: 1px solid var(--line); border-radius: 10px; padding: 20px; background: #fff; }
+#appScreen .step { border: 1px solid var(--line); border-radius: 10px; padding: 20px; background: var(--surface); }
 #appScreen .step .n { width: 36px; height: 36px; border-radius: 50%; background: var(--blue-l); color: var(--blue); display: grid; place-items: center; font-weight: 800; margin-bottom: 12px; }
 #appScreen .step b { display: block; margin-bottom: 6px; }
 #appScreen .step p { color: var(--muted); font-size: 14px; line-height: 1.5; }
@@ -180,7 +182,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* ================= Модалка ================= */
 #appScreen .modal-bg { position: fixed; inset: 0; background: rgba(15, 20, 40, .5); backdrop-filter: blur(3px); z-index: 40; display: grid; place-items: center; padding: 16px; animation: fade .2s ease; }
 @keyframes fade { from { opacity: 0; } }
-#appScreen .modal { background: #fff; border-radius: 14px; width: 100%; max-width: 560px; max-height: calc(100vh - 32px); overflow: auto; animation: modalIn .3s cubic-bezier(.2,.9,.3,1.2); }
+#appScreen .modal { background: var(--surface); border-radius: 14px; width: 100%; max-width: 560px; max-height: calc(100vh - 32px); overflow: auto; animation: modalIn .3s cubic-bezier(.2,.9,.3,1.2); }
 @keyframes modalIn { from { opacity: 0; transform: translateY(20px) scale(.97); } }
 #appScreen .m-cover { height: 140px; background-size: 160px 160px; display: grid; place-items: center; position: relative; }
 #appScreen .m-cover .em { font-size: 52px; width: 86px; height: 86px; border-radius: 22px; background: rgba(255,255,255,.85); display: grid; place-items: center; }
@@ -197,10 +199,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 #appScreen .form .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 #appScreen .m-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; flex-wrap: wrap; }
 #appScreen .quick { display: flex; gap: 6px; flex-wrap: wrap; }
-#appScreen .quick button { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 4px 12px; font-size: 13px; cursor: pointer; }
+#appScreen .quick button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 12px; font-size: 13px; cursor: pointer; }
 #appScreen .quick button.on, #appScreen .quick button:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-l); }
 #appScreen .emoji-pick { display: flex; gap: 6px; flex-wrap: wrap; }
-#appScreen .emoji-pick button { width: 38px; height: 38px; border-radius: 8px; border: 1px solid var(--line); background: #fff; font-size: 20px; cursor: pointer; }
+#appScreen .emoji-pick button { width: 38px; height: 38px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); font-size: 20px; cursor: pointer; }
 #appScreen .emoji-pick button.on { border-color: var(--blue); background: var(--blue-l); }
 
 /* ================= Тосты ================= */
@@ -261,6 +263,85 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* выбор общежития в окне */
 #appScreen .dorm-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 @media (max-width: 600px) { #appScreen .dorm-pick { grid-template-columns: 1fr; } }
+
+
+/* ================= Тёмная тема ================= */
+:root[data-theme="dark"] {
+  --bg: #0f1218; --surface: #171b23; --panel: #1c212b; --line: #2d3440;
+  --text: #e6e9ef; --muted: #9aa3ad; --link: #8ea6ff; --blue-l: #1d2752;
+}
+:root[data-theme="dark"] body { background: var(--bg); }
+:root[data-theme="dark"] #appScreen .topbar { background: #1029b8; }
+:root[data-theme="dark"] #appScreen .footer { background: #0d1f8f; }
+:root[data-theme="dark"] #appScreen .count { border-color: #1029b8; }
+:root[data-theme="dark"] #appScreen select.ctl { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14'%3E%3Cpath d='M2 5l3-3 3 3M2 9l3 3 3-3' stroke='%23ccc' stroke-width='1.4' fill='none'/%3E%3C/svg%3E"); }
+:root[data-theme="dark"] #appScreen .alert.red { background: #3a1820; border-color: #6b2632; color: #ffb3bf; }
+:root[data-theme="dark"] #appScreen .alert.yellow { background: #3a3014; border-color: #6b5a1f; color: #ffe08a; }
+:root[data-theme="dark"] #appScreen .tag { background: #3a3014; color: #ffe08a; border-color: #6b5a1f; }
+:root[data-theme="dark"] #appScreen .cover .em, :root[data-theme="dark"] #appScreen .m-cover .em { background: rgba(23,27,35,.85); }
+:root[data-theme="dark"] #appScreen .modal-bg { background: rgba(0,0,0,.6); }
+:root[data-theme="dark"] #appScreen .dorm { background: var(--surface); border-color: var(--line); }
+:root[data-theme="dark"] #appScreen .dorm b { color: var(--text); }
+:root[data-theme="dark"] #appScreen .dorm.on { background: var(--blue-l); border-color: #4d6bff; }
+:root[data-theme="dark"] #appScreen .dorm .radio { background: var(--surface); }
+:root[data-theme="dark"] #appScreen .ctl { color: var(--text); }
+:root[data-theme="dark"] #appScreen .rules { color: var(--text); }
+:root[data-theme="dark"] #appScreen .m-body .desc { color: var(--text); }
+body, #appScreen .card, #appScreen .group, #appScreen .ctl, #appScreen .btn, #appScreen .modal, #appScreen .dropdown { transition: background-color .3s, border-color .3s, color .3s; }
+#appScreen .theme-btn { font-size: 18px; width: 34px; height: 34px; place-items: center; }
+
+/* мини-рейтинг на карточке */
+#appScreen .stars-mini { color: #c98a00; font-weight: 600; }
+
+/* конфетти */
+.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 200; }
+
+/* звёзды оценки */
+#appScreen .rate { display: inline-flex; gap: 6px; }
+#appScreen .rate button { font-size: 38px; line-height: 1; border: 0; background: none; cursor: pointer; color: #cfd4dc; transition: transform .15s, color .15s; }
+#appScreen .rate button:hover { transform: scale(1.18); }
+#appScreen .rate button.on { color: #f9b812; text-shadow: 0 2px 10px rgba(249,184,18,.45); }
+
+/* профиль */
+#appScreen .profile-hero { display: flex; gap: 22px; align-items: center; padding: 28px; border-radius: 14px; color: #fff;
+  background: linear-gradient(120deg, #1438f0, #0b26c2 60%, #2bb8e8); position: relative; overflow: hidden; }
+#appScreen .profile-hero::after { content: ''; position: absolute; right: -40px; top: -60px; width: 260px; height: 260px; border-radius: 50%; background: rgba(255,255,255,.08); }
+#appScreen .profile-hero p { opacity: .9; margin-top: 4px; }
+#appScreen .avatar.big { width: 84px; height: 84px; font-size: 30px; font-weight: 800; color: var(--blue); flex: none; box-shadow: 0 10px 24px rgba(0,0,0,.2); }
+#appScreen .hero-stars { font-size: 20px; color: #ffd25e; letter-spacing: 2px; }
+#appScreen .hero-stars small { font-size: 13px; color: #fff; letter-spacing: 0; opacity: .85; margin-left: 6px; }
+#appScreen .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 14px; }
+#appScreen .tile { border: 1px solid var(--line); border-radius: 12px; padding: 18px; background: var(--surface); display: grid; gap: 2px; animation: cardIn .4s ease both; }
+#appScreen .tile span { font-size: 24px; }
+#appScreen .tile b { font-size: 28px; font-weight: 800; letter-spacing: -.5px; }
+#appScreen .tile small { color: var(--muted); }
+#appScreen .achs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+#appScreen .ach { display: flex; gap: 12px; align-items: center; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); opacity: .55; filter: grayscale(1); animation: cardIn .4s ease both; }
+#appScreen .ach.got { opacity: 1; filter: none; border-color: #c5d1ff; box-shadow: 0 6px 18px rgba(20,56,240,.10); }
+#appScreen .ach > span { font-size: 28px; width: 50px; height: 50px; border-radius: 14px; background: var(--blue-l); display: grid; place-items: center; flex: none; }
+#appScreen .ach b { display: block; }
+#appScreen .ach small { color: var(--muted); font-size: 13px; }
+#appScreen .ach em { margin-left: auto; font-style: normal; color: var(--green); font-weight: 800; }
+#appScreen .ach em.lock { filter: none; opacity: .7; }
+#appScreen .dbar { display: grid; grid-template-columns: 190px 1fr 110px; gap: 12px; align-items: center; padding: 6px 0; font-size: 14px; }
+#appScreen .dbar .track { height: 10px; background: var(--line); border-radius: 6px; overflow: hidden; }
+#appScreen .dbar i { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, #36e2fa, #1438f0); transition: width 1s cubic-bezier(.2,.9,.3,1); }
+#appScreen .dbar b { text-align: right; }
+#appScreen .dbar.me span { font-weight: 700; color: var(--link); }
+@media (max-width: 900px) {
+  #appScreen .tiles { grid-template-columns: 1fr 1fr; }
+  #appScreen .achs { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  #appScreen .achs { grid-template-columns: 1fr; }
+  #appScreen .profile-hero { flex-direction: column; text-align: center; padding: 24px 16px; }
+  #appScreen .dbar { grid-template-columns: 1fr 80px; }
+  #appScreen .dbar .track { grid-column: span 2; order: 3; }
+}
+
+/* аватар в шапке всегда тёмными буквами на белом */
+#appScreen .topbar .avatar, #appScreen .profile-hero .avatar { color: #1d2125; }
+#appScreen .profile-hero .avatar.big { color: #1438f0; }
 
 </style>
   <style>
@@ -504,9 +585,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
         <a href="#catalog" data-route="catalog" data-i18n="navCatalog">Каталог</a>
         <a href="#my" data-route="my" data-i18n="navMy">Мои объявления</a>
         <a href="#loans" data-route="loans" data-i18n="navLoans">Мои займы</a>
+        <a href="#profile" data-route="profile" data-i18n="navProfile">Профиль</a>
         <a href="#about" data-route="about" data-i18n="navAbout">О сервисе</a>
       </nav>
       <div class="top-right">
+        <button class="icon-btn theme-btn" id="themeBtn" title="Тёмная / светлая тема" aria-label="Тема">🌙</button>
         <div class="bell-wrap">
           <button class="icon-btn" id="bellBtn" aria-label="Напоминания">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22zm7-6V11a7 7 0 0 0-5.5-6.84V3.5a1.5 1.5 0 0 0-3 0v.66A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2z"/></svg>
@@ -521,6 +604,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
           </button>
           <div class="dropdown user-menu" id="userMenu" hidden>
             <div class="um-head"><b id="umName"></b><small id="umRoom"></small></div>
+            <a href="#profile" data-i18n="umProfile">👤 Профиль и достижения</a>
             <a href="#my" data-i18n="umMy">📦 Мои объявления</a>
             <a href="#loans" data-i18n="umLoans">⏰ Мои займы</a>
             <button id="dormBtn" data-i18n="umDorm">🏠 Сменить общежитие</button>
@@ -824,7 +908,7 @@ const I18N = {
     dormSub: 'Покажем вещи и услуги соседей рядом с вами',
     continue: 'Продолжить',
 
-    navCatalog: 'Каталог', navMy: 'Мои объявления', navLoans: 'Мои займы', navAbout: 'О сервисе',
+    navCatalog: 'Каталог', navMy: 'Мои объявления', navLoans: 'Мои займы', navAbout: 'О сервисе', navProfile: 'Профиль', umProfile: '👤 Профиль и достижения',
     umMy: '📦 Мои объявления', umLoans: '⏰ Мои займы', umDorm: '🏠 Сменить общежитие',
     umLang: '🌐 English', umReset: '↺ Сбросить демо-данные', umLogout: '⎋ Выйти',
     fAbout: 'О сервисе', fHow: 'Как это работает', fRules: 'Правила обмена', fSupport: 'Поддержка',
@@ -859,7 +943,7 @@ const I18N = {
     dormSub: 'We will show items and services from neighbours nearby',
     continue: 'Continue',
 
-    navCatalog: 'Catalogue', navMy: 'My listings', navLoans: 'My loans', navAbout: 'About',
+    navCatalog: 'Catalogue', navMy: 'My listings', navLoans: 'My loans', navAbout: 'About', navProfile: 'Profile', umProfile: '👤 Profile & badges',
     umMy: '📦 My listings', umLoans: '⏰ My loans', umDorm: '🏠 Change dormitory',
     umLang: '🌐 Русский', umReset: '↺ Reset demo data', umLogout: '⎋ Log out',
     fAbout: 'About', fHow: 'How it works', fRules: 'Sharing rules', fSupport: 'Support',
@@ -1223,7 +1307,7 @@ function cardHtml(it, opts = {}) {
           <svg width="16" height="12" viewBox="0 0 20 14" fill="#6a737b"><circle cx="6" cy="4" r="3"/><circle cx="14" cy="4" r="3"/><path d="M0 13c0-3 2.7-5 6-5s6 2 6 5zM10 13c.3-2.3 1.6-4 4-4 3.3 0 6 2 6 4z"/></svg>${it.uses}</span>
         <button class="kebab" data-menu="${it.id}" aria-label="Действия">⋮</button>
       </div>
-      <div class="meta">${mine ? t('mine') : esc(it.ownerName)} / ${esc(dormName(it.bld))}${it.room ? ' · ' + t('room') + ' ' + esc(it.room) : ''}</div>
+      <div class="meta">${mine ? t('mine') : esc(it.ownerName)}${ratingOf(it.owner) ? ` <span class="stars-mini">★ ${ratingOf(it.owner).avg.toFixed(1)}</span>` : ''} / ${esc(dormName(it.bld))}${it.room ? ' · ' + t('room') + ' ' + esc(it.room) : ''}</div>
       <div class="meta">${esc(it.cat)}</div>
       <div class="foot">${foot}</div>
       ${extra}${actions}
@@ -1257,7 +1341,7 @@ function bindCards(root) {
   $$('[data-act]', root).forEach(b => b.addEventListener('click', e => {
     e.stopPropagation();
     const id = b.closest('.card').dataset.id;
-    ({ ret: returnItem, remind: remindBorrower, del: deleteItem, take: openItem })[b.dataset.act](id);
+    ({ ret: returnItem, remind: remindBorrower, del: deleteItem, take: openItem, ics: downloadIcs })[b.dataset.act](id);
   }));
 }
 
@@ -1414,7 +1498,7 @@ function pageLoans() {
     </div>
     ${rem.map(r => `<div class="alert ${r.lvl}"><span class="ai">${r.lvl === 'red' ? '⚠️' : '⏰'}</span><div class="grow"><b>${esc(r.text)}</b><div class="meta" style="color:inherit;opacity:.8">${esc(r.sub)}</div></div></div>`).join('')}
     <section class="group"><div class="group-h"><span class="chev">▼</span><b>📥 Я взял на время</b><span class="tag blue">Нужно вернуть</span><span class="pill">${took.length}</span></div>
-      ${took.length ? `<div class="grid">${took.map((it, i) => cardHtml(it, { i, loan: true, actions: `<button class="btn sm success" data-act="ret">✓ Я вернул</button>` })).join('')}</div>`
+      ${took.length ? `<div class="grid">${took.map((it, i) => cardHtml(it, { i, loan: true, actions: `<button class="btn sm" data-act="ics" title="Добавить напоминание в календарь телефона">📅 В календарь</button><button class="btn sm success" data-act="ret">✓ Я вернул</button>` })).join('')}</div>`
         : `<div class="empty"><div class="big">🙌</div>Ты ничего не должен соседям. <a href="#catalog">Найти вещь в каталоге</a></div>`}
     </section>
     <section class="group"><div class="group-h"><span class="chev">▼</span><b>📤 У меня взяли</b><span class="pill">${lent.length}</span></div>
@@ -1493,7 +1577,7 @@ function openItem(id) {
   } else if (iBorrow) {
     const p = loanProgress(it);
     action = `<p><span class="badge ${p.bcls}">${p.label}</span> &nbsp;Вернуть до <b>${fmtDate(it.to)}</b></p>
-      <div class="m-actions"><button class="btn success" id="retBtn">✓ Я вернул</button></div>`;
+      <div class="m-actions"><button class="btn" id="icsBtn">📅 В календарь</button><button class="btn success" id="retBtn">✓ Я вернул</button></div>`;
   } else if (it.status === 'busy') {
     action = `<p class="meta">Сейчас у: <b>${esc(it.borrowerName)}</b> до ${fmtDate(it.to)}.${mine ? '' : ' Загляни позже или поищи похожее.'}</p>
       ${mine ? `<div class="m-actions"><button class="btn" id="remBtn">🔔 Напомнить</button><button class="btn success" id="retBtn">✓ Мне вернули</button></div>` : ''}`;
@@ -1520,7 +1604,8 @@ function openItem(id) {
     </div>`);
 
   $('.m-cancel')?.addEventListener('click', closeModal);
-  $('#retBtn')?.addEventListener('click', () => { returnItem(id); closeModal(); });
+  $('#retBtn')?.addEventListener('click', () => { closeModal(); returnItem(id); });
+  $('#icsBtn')?.addEventListener('click', () => downloadIcs(id));
   $('#remBtn')?.addEventListener('click', () => remindBorrower(id));
   $('#delBtn')?.addEventListener('click', () => { closeModal(); deleteItem(id); });
   const f = $('#actForm');
@@ -1532,13 +1617,16 @@ function openItem(id) {
   f.addEventListener('submit', e => {
     e.preventDefault();
     if (it.type === 'service') {
-      it.uses++; persist(); closeModal();
+      it.uses++; logEvent({ type: 'service', who: ME.email, owner: it.owner, item: it.title, price: priceOf(it) });
+      persist(); closeModal(); checkAchievements();
       toast('📨', 'Заявка отправлена', ` ${it.ownerName.split(' ')[0]} получит сообщение и свяжется с тобой (${it.tg}).`);
     } else {
       const to = f.to.value;
       if (!to || daysUntil(to) < 1) { toast('⚠️', 'Выбери дату возврата не раньше завтра'); return; }
       Object.assign(it, { status: 'busy', borrower: ME.email, borrowerName: ME.name, from: iso(today()), to });
-      it.uses++; persist(); closeModal(); route();
+      it.uses++; logEvent({ type: 'borrow', who: ME.email, owner: it.owner, item: it.title, price: priceOf(it) });
+      persist(); closeModal(); route(); confetti();
+      setTimeout(checkAchievements, 900);
       toast('🎉', 'Вещь твоя до ' + fmtDate(to), ` Забрать: ${it.ownerName.split(' ')[0]}, ${dormName(it.bld)}${it.room ? ', комн. ' + it.room : ''}. Напомним о возврате!`);
     }
   });
@@ -1563,6 +1651,8 @@ function openNew(type) {
           <label><span>Контакт (Telegram)</span><input class="ctl" name="tg" value="${esc(ME.tg || '')}" placeholder="@username"></label>
         </div>
         <label><span>Описание</span><textarea class="ctl" name="desc" maxlength="400" placeholder="Состояние, комплектация, условия"></textarea></label>
+        <label><span>${type === 'thing' ? 'Сколько стоит новая, ₽' : 'Сколько стоила бы у мастера, ₽'} <small class="meta">(для подсчёта экономии)</small></span>
+          <input class="ctl" name="price" type="number" min="0" max="500000" step="100" placeholder="${DEFAULT_PRICE[cats[0]]}"></label>
         <label><span>Иконка</span><div class="emoji-pick">${emojis.map((e, i) => `<button type="button" class="${i === 0 ? 'on' : ''}">${e}</button>`).join('')}</div></label>
         <div class="m-actions"><button type="button" class="btn m-cancel">Отмена</button><button class="btn primary">Опубликовать</button></div>
       </form>
@@ -1588,12 +1678,15 @@ function openNew(type) {
     }
     items.unshift({
       id: 'u' + Date.now(), type, title, cat: f.cat.value, emoji,
+      price: Math.max(0, Math.round(+f.price.value || DEFAULT_PRICE[f.cat.value] || 1000)),
       desc: f.desc.value.trim() || 'Без описания',
       owner: ME.email, ownerName: ME.name, bld: ME.bld, room: ME.room, tg,
       status: 'free', uses: 0, created: iso(today()) + 'T' + Date.now(), rating: null, reviews: 0
     });
+    logEvent({ type: 'post', who: ME.email, item: title });
     persist(); closeModal();
     toast('✅', 'Объявление опубликовано', ' Соседи уже могут его увидеть');
+    checkAchievements();
     location.hash === '#my' ? route() : (location.hash = 'my');
   });
 }
@@ -1602,8 +1695,13 @@ function openNew(type) {
 function returnItem(id) {
   const it = items.find(x => x.id === id);
   const wasMine = it.owner === ME.email;
+  const other = wasMine ? { email: it.borrower, name: it.borrowerName } : { email: it.owner, name: it.ownerName };
+  const onTime = it.to ? daysUntil(it.to) >= 0 : true;
+  logEvent({ type: 'return', who: wasMine ? it.borrower : ME.email, owner: it.owner, item: it.title, onTime });
   Object.assign(it, { status: 'free', borrower: null, borrowerName: null, from: null, to: null });
   persist(); route();
+  setTimeout(() => askRating(other, it.title), 500);
+  checkAchievements();
   toast('✅', wasMine ? 'Вещь снова у тебя' : 'Спасибо, что вернул!', wasMine ? ` «${it.title}» снова доступна соседям` : ` ${it.ownerName.split(' ')[0]} получит уведомление`);
 }
 function remindBorrower(id) {
@@ -1618,8 +1716,200 @@ function deleteItem(id) {
   toast('🗑', 'Объявление удалено');
 }
 
+
+/* ================= Дополнительно: статистика, достижения, оценки, календарь, тема ================= */
+const DEFAULT_PRICE = {
+  'Инструменты': 4500, 'Бытовая техника': 3500, 'Кухня': 3000, 'Спорт и отдых': 6000, 'Учёба': 1500, 'Игры': 2000,
+  'Ремонт техники': 1500, 'Помощь с учёбой': 1200, 'Красота': 800, 'Другое': 700
+};
+function priceOf(it) { return it.price || DEFAULT_PRICE[it.cat] || 1000; }
+
+function getLog() { return DB.get('log', []); }
+function logEvent(e) { const l = getLog(); l.push(Object.assign({ at: Date.now() }, e)); DB.set('log', l); }
+
+function ratingOf(email) {
+  const r = getLog().filter(e => e.type === 'rate' && e.to === email);
+  if (!r.length) return null;
+  return { avg: r.reduce((s, e) => s + e.stars, 0) / r.length, n: r.length };
+}
+
+function statsOf(email) {
+  const log = getLog();
+  const borrowed = log.filter(e => e.type === 'borrow' && e.who === email);
+  const services = log.filter(e => e.type === 'service' && e.who === email);
+  return {
+    borrowed: borrowed.length,
+    lent: log.filter(e => e.type === 'borrow' && e.owner === email).length,
+    helped: log.filter(e => e.type === 'service' && e.owner === email).length,
+    posted: log.filter(e => e.type === 'post' && e.who === email).length,
+    returnedOnTime: log.filter(e => e.type === 'return' && e.who === email && e.onTime).length,
+    saved: [...borrowed, ...services].reduce((s, e) => s + (e.price || 0), 0),
+    rating: ratingOf(email)
+  };
+}
+
+const ACHIEVEMENTS = [
+  { id: 'first_post', icon: '📦', name: 'Первый шаг', desc: 'Выложить первое объявление', ok: s => s.posted >= 1 },
+  { id: 'first_borrow', icon: '🤝', name: 'Знакомство с соседом', desc: 'Взять вещь или услугу у соседа', ok: s => s.borrowed + (s.saved && !s.borrowed ? 1 : 0) >= 1 },
+  { id: 'generous', icon: '🎁', name: 'Щедрый сосед', desc: 'Одолжить вещи 3 раза', ok: s => s.lent >= 3 },
+  { id: 'reliable', icon: '⏰', name: 'Надёжный', desc: 'Вернуть 3 вещи вовремя', ok: s => s.returnedOnTime >= 3 },
+  { id: 'saver', icon: '💰', name: 'Экономист', desc: 'Сэкономить 10 000 ₽', ok: s => s.saved >= 10000 },
+  { id: 'star', icon: '⭐', name: 'Звезда общежития', desc: 'Средняя оценка от 4.5 (мин. 3 оценки)', ok: s => s.rating && s.rating.n >= 3 && s.rating.avg >= 4.5 }
+];
+
+function checkAchievements() {
+  const s = statsOf(ME.email), key = 'ach_' + ME.email;
+  const have = DB.get(key, []);
+  const fresh = ACHIEVEMENTS.filter(a => a.ok(s) && !have.includes(a.id));
+  if (!fresh.length) return;
+  DB.set(key, [...have, ...fresh.map(a => a.id)]);
+  fresh.forEach((a, i) => setTimeout(() => { toast('🏆', 'Новое достижение: ' + a.name, ' ' + a.desc); confetti(); }, 600 + i * 900));
+}
+
+/* конфетти */
+function confetti() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = document.createElement('canvas');
+  c.className = 'confetti'; c.width = innerWidth; c.height = innerHeight;
+  document.body.appendChild(c);
+  const ctx = c.getContext('2d');
+  const colors = ['#1438f0', '#36e2fa', '#ffd25e', '#18a957', '#ff8fab', '#8775e9'];
+  const parts = Array.from({ length: 140 }, () => ({
+    x: innerWidth / 2 + (Math.random() - .5) * 200, y: innerHeight / 3,
+    vx: (Math.random() - .5) * 14, vy: Math.random() * -12 - 4,
+    s: 5 + Math.random() * 6, r: Math.random() * 6, vr: (Math.random() - .5) * .3,
+    c: colors[Math.floor(Math.random() * colors.length)]
+  }));
+  let frame = 0;
+  (function tick() {
+    ctx.clearRect(0, 0, c.width, c.height);
+    parts.forEach(p => {
+      p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+      ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); ctx.restore();
+    });
+    if (++frame < 150) requestAnimationFrame(tick); else c.remove();
+  })();
+}
+
+/* оценка после возврата */
+function askRating(other, title) {
+  if (!other.email || other.email === ME.email) return;
+  let stars = 0;
+  openModal(`
+    <div class="m-body" style="text-align:center">
+      <div style="font-size:44px">🤝</div>
+      <h3>Как прошёл обмен?</h3>
+      <p class="meta" style="margin:4px 0 14px">Оцени соседа: <b>${esc(other.name || '')}</b> · «${esc(title)}»</p>
+      <div class="rate" id="rate">${[1, 2, 3, 4, 5].map(n => `<button type="button" data-n="${n}" aria-label="${n}">★</button>`).join('')}</div>
+      <p class="meta" id="rateTxt" style="min-height:20px;margin-top:6px"></p>
+      <div class="m-actions" style="justify-content:center"><button class="btn m-cancel">Пропустить</button><button class="btn primary" id="rateSend" disabled>Оценить</button></div>
+    </div>`);
+  const words = ['', 'Плохо 😕', 'Так себе', 'Нормально', 'Хорошо 🙂', 'Отлично! 🔥'];
+  const paint = n => $$('#rate button').forEach(b => b.classList.toggle('on', +b.dataset.n <= n));
+  $$('#rate button').forEach(b => {
+    b.addEventListener('mouseenter', () => paint(+b.dataset.n));
+    b.addEventListener('mouseleave', () => paint(stars));
+    b.addEventListener('click', () => { stars = +b.dataset.n; paint(stars); $('#rateTxt').textContent = words[stars]; $('#rateSend').disabled = false; });
+  });
+  $('.m-cancel').addEventListener('click', closeModal);
+  $('#rateSend').addEventListener('click', () => {
+    logEvent({ type: 'rate', from: ME.email, to: other.email, stars, item: title });
+    closeModal(); route();
+    toast('⭐', 'Спасибо за оценку!', ' Так соседи понимают, кому можно доверять');
+    if (stars === 5) confetti();
+  });
+}
+
+/* напоминание в календарь (.ics — открывается в Google/Apple/Outlook календаре) */
+function downloadIcs(id) {
+  const it = items.find(x => x.id === id);
+  if (!it || !it.to) return;
+  const d = it.to.replace(/-/g, ''), stamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const ics = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Sosedi//RU', 'BEGIN:VEVENT',
+    `UID:${it.id}-${d}@sosedi`, `DTSTAMP:${stamp}`,
+    `DTSTART:${d}T100000`, `DTEND:${d}T103000`,
+    `SUMMARY:Вернуть «${it.title}»`,
+    `DESCRIPTION:Владелец: ${it.ownerName}\\, ${dormName(it.bld)}${it.room ? '\\, комн. ' + it.room : ''}. Сервис «Соседи».`,
+    'BEGIN:VALARM', 'TRIGGER:-P1D', 'ACTION:DISPLAY', 'DESCRIPTION:Завтра вернуть вещь соседу', 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR'
+  ].join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+  a.download = 'vernut-' + it.id + '.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('📅', 'Напоминание скачано', ' Открой файл — событие добавится в календарь с оповещением за день');
+}
+
+/* страница профиля */
+function pageProfile() {
+  const s = statsOf(ME.email), have = DB.get('ach_' + ME.email, []);
+  const log = getLog();
+  const byDorm = DORMS.map(d => {
+    const members = new Set(getUsers().filter(u => u.bld === d.id).map(u => u.email));
+    const saved = log.filter(e => (e.type === 'borrow' || e.type === 'service') && members.has(e.who)).reduce((a, e) => a + (e.price || 0), 0);
+    return { d, saved };
+  });
+  const maxSaved = Math.max(1, ...byDorm.map(x => x.saved));
+  const stars = s.rating ? '★★★★★'.slice(0, Math.round(s.rating.avg)).padEnd(5, '☆') : '☆☆☆☆☆';
+  $('#view').innerHTML = `
+  <div class="page">
+    <div class="profile-hero">
+      <span class="avatar big">${initials(ME.name)}</span>
+      <div>
+        <h1 style="margin:0;color:#fff">${esc(ME.name)}</h1>
+        <p>🏠 ${esc(dormName(ME.bld))}${ME.room ? ' · комн. ' + esc(ME.room) : ''}</p>
+        <p class="hero-stars">${stars} <small>${s.rating ? s.rating.avg.toFixed(1) + ' · ' + s.rating.n + ' ' + plural(s.rating.n, 'оценка', 'оценки', 'оценок') : 'пока нет оценок'}</small></p>
+      </div>
+    </div>
+
+    <div class="tiles">
+      <div class="tile"><span>💰</span><b data-count="${s.saved}" data-suffix=" ₽">0 ₽</b><small>сэкономлено</small></div>
+      <div class="tile"><span>📥</span><b data-count="${s.borrowed}">0</b><small>взял на время</small></div>
+      <div class="tile"><span>📤</span><b data-count="${s.lent}">0</b><small>одолжил соседям</small></div>
+      <div class="tile"><span>🤝</span><b data-count="${s.helped}">0</b><small>раз помог услугой</small></div>
+    </div>
+
+    <h2 class="sec">Достижения <small class="meta">${have.length} из ${ACHIEVEMENTS.length}</small></h2>
+    <div class="achs">${ACHIEVEMENTS.map((a, i) => `
+      <div class="ach ${have.includes(a.id) ? 'got' : ''}" style="animation-delay:${i * 50}ms">
+        <span>${a.icon}</span><div><b>${a.name}</b><small>${a.desc}</small></div>${have.includes(a.id) ? '<em>✓</em>' : '<em class="lock">🔒</em>'}
+      </div>`).join('')}</div>
+
+    <h2 class="sec">Экономия по общежитиям</h2>
+    <div class="group" style="padding:16px 18px">
+      ${byDorm.some(x => x.saved) ? byDorm.sort((a, b) => b.saved - a.saved).map(x => `
+        <div class="dbar ${x.d.id === ME.bld ? 'me' : ''}"><span>${esc(dormName(x.d.id))}</span>
+          <div class="track"><i style="width:${Math.round(x.saved / maxSaved * 100)}%"></i></div><b>${x.saved.toLocaleString('ru-RU')} ₽</b></div>`).join('')
+        : '<p class="meta">Пока нет обменов. Когда соседи начнут брать вещи друг у друга, здесь появится рейтинг общежитий 🏆</p>'}
+    </div>
+  </div>`;
+  $$('#view [data-count]').forEach(el => {
+    const target = +el.dataset.count, suf = el.dataset.suffix || '', t0 = performance.now();
+    (function tick(tm) {
+      const p = Math.min(1, (tm - t0) / 1200), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * e).toLocaleString('ru-RU') + suf;
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  });
+  requestAnimationFrame(() => $$('.dbar i').forEach(i => { const w = i.style.width; i.style.width = '0'; requestAnimationFrame(() => i.style.width = w); }));
+}
+
+/* тёмная тема */
+function applyTheme(th) {
+  document.documentElement.dataset.theme = th;
+  const b = $('#themeBtn');
+  if (b) b.textContent = th === 'dark' ? '☀️' : '🌙';
+}
+applyTheme(DB.get('theme', 'light'));
+$('#themeBtn').addEventListener('click', () => {
+  const th = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  DB.set('theme', th); applyTheme(th);
+});
+
 /* ---------- роутер ---------- */
-const PAGES = { catalog: pageCatalog, my: pageMy, loans: pageLoans, about: pageAbout };
+const PAGES = { catalog: pageCatalog, my: pageMy, loans: pageLoans, profile: pageProfile, about: pageAbout };
 function route() {
   const r = location.hash.slice(1) || 'catalog';
   (PAGES[r] || pageCatalog)();

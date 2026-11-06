@@ -77,9 +77,11 @@
         <a href="#catalog" data-route="catalog" data-i18n="navCatalog">Каталог</a>
         <a href="#my" data-route="my" data-i18n="navMy">Мои объявления</a>
         <a href="#loans" data-route="loans" data-i18n="navLoans">Мои займы</a>
+        <a href="#profile" data-route="profile" data-i18n="navProfile">Профиль</a>
         <a href="#about" data-route="about" data-i18n="navAbout">О сервисе</a>
       </nav>
       <div class="top-right">
+        <button class="icon-btn theme-btn" id="themeBtn" title="Тёмная / светлая тема" aria-label="Тема">🌙</button>
         <div class="bell-wrap">
           <button class="icon-btn" id="bellBtn" aria-label="Напоминания">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22zm7-6V11a7 7 0 0 0-5.5-6.84V3.5a1.5 1.5 0 0 0-3 0v.66A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2z"/></svg>
@@ -94,6 +96,7 @@
           </button>
           <div class="dropdown user-menu" id="userMenu" hidden>
             <div class="um-head"><b id="umName"></b><small id="umRoom"></small></div>
+            <a href="#profile" data-i18n="umProfile">👤 Профиль и достижения</a>
             <a href="#my" data-i18n="umMy">📦 Мои объявления</a>
             <a href="#loans" data-i18n="umLoans">⏰ Мои займы</a>
             <button id="dormBtn" data-i18n="umDorm">🏠 Сменить общежитие</button>

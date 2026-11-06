@@ -16,7 +16,7 @@ const I18N = {
     dormSub: 'Покажем вещи и услуги соседей рядом с вами',
     continue: 'Продолжить',
 
-    navCatalog: 'Каталог', navMy: 'Мои объявления', navLoans: 'Мои займы', navAbout: 'О сервисе',
+    navCatalog: 'Каталог', navMy: 'Мои объявления', navLoans: 'Мои займы', navAbout: 'О сервисе', navProfile: 'Профиль', umProfile: '👤 Профиль и достижения',
     umMy: '📦 Мои объявления', umLoans: '⏰ Мои займы', umDorm: '🏠 Сменить общежитие',
     umLang: '🌐 English', umReset: '↺ Сбросить демо-данные', umLogout: '⎋ Выйти',
     fAbout: 'О сервисе', fHow: 'Как это работает', fRules: 'Правила обмена', fSupport: 'Поддержка',
@@ -51,7 +51,7 @@ const I18N = {
     dormSub: 'We will show items and services from neighbours nearby',
     continue: 'Continue',
 
-    navCatalog: 'Catalogue', navMy: 'My listings', navLoans: 'My loans', navAbout: 'About',
+    navCatalog: 'Catalogue', navMy: 'My listings', navLoans: 'My loans', navAbout: 'About', navProfile: 'Profile', umProfile: '👤 Profile & badges',
     umMy: '📦 My listings', umLoans: '⏰ My loans', umDorm: '🏠 Change dormitory',
     umLang: '🌐 Русский', umReset: '↺ Reset demo data', umLogout: '⎋ Log out',
     fAbout: 'About', fHow: 'How it works', fRules: 'Sharing rules', fSupport: 'Support',
