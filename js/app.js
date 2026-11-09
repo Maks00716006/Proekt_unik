@@ -38,12 +38,6 @@ document.addEventListener('click', e => {
 });
 $('#burger').addEventListener('click', () => $('#nav').classList.toggle('open'));
 $('#logoutBtn').addEventListener('click', () => { logout(); location.hash = ''; location.reload(); });
-$('#resetBtn').addEventListener('click', () => {
-  $$('.dropdown').forEach(d => d.hidden = true);
-  if (!confirm('Удалить все объявления и обмены? Это действие нельзя отменить.')) return;
-  items = []; persist(); route();
-  toast('✓', 'Объявления удалены');
-});
 /* смена общежития */
 function openDormPicker() {
   $$('.dropdown').forEach(d => d.hidden = true);
