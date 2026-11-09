@@ -212,7 +212,6 @@ function pageCatalog() {
   });
   const sorters = {
     new: (a, b) => b.created.localeCompare(a.created),
-    popular: (a, b) => b.uses - a.uses,
     name: (a, b) => a.title.localeCompare(b.title, 'ru'),
     free: (a, b) => (a.status === 'busy') - (b.status === 'busy')
   };
@@ -252,7 +251,6 @@ function pageCatalog() {
       <label class="f-sort"><span>${t('sort')}</span>
         <select class="ctl" id="fSort">
           <option value="new" ${F.sort === 'new' ? 'selected' : ''}>${t('sortNew')}</option>
-          <option value="popular" ${F.sort === 'popular' ? 'selected' : ''}>${t('sortPop')}</option>
           <option value="free" ${F.sort === 'free' ? 'selected' : ''}>${t('sortFree')}</option>
           <option value="name" ${F.sort === 'name' ? 'selected' : ''}>${t('sortName')}</option>
         </select></label>

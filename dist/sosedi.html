@@ -1017,7 +1017,7 @@ const I18N = {
     ads: 'Объявлений', post: '＋ Разместить', dorm: 'Общежитие', allDorms: 'Все общежития',
     category: 'Категория', allCats: 'Все категории', status: 'Статус', any: 'Любой',
     sFree: 'Свободно', sBusy: 'Занято', search: 'Поиск', searchPh: 'Найти вещь или услугу',
-    sort: 'Упорядочить', sortNew: 'Сначала новые', sortPop: 'По популярности',
+    sort: 'Упорядочить', sortNew: 'Сначала новые',
     sortFree: 'Сначала свободные', sortName: 'По названию', view: 'Вид', compact: 'Компактно',
     apply: 'Применить', reset: 'Сбросить', freeOf: 'свободно', nowFree: 'Сейчас доступно',
     myDorm: 'Моё общежитие', room: 'комн.', mine: 'Моё',
@@ -1052,7 +1052,7 @@ const I18N = {
     ads: 'Listings', post: '＋ Post', dorm: 'Dormitory', allDorms: 'All dormitories',
     category: 'Category', allCats: 'All categories', status: 'Status', any: 'Any',
     sFree: 'Available', sBusy: 'Taken', search: 'Search', searchPh: 'Find an item or service',
-    sort: 'Sort by', sortNew: 'Newest first', sortPop: 'Most popular',
+    sort: 'Sort by', sortNew: 'Newest first',
     sortFree: 'Available first', sortName: 'By name', view: 'View', compact: 'Compact',
     apply: 'Apply', reset: 'Reset', freeOf: 'available', nowFree: 'Available now',
     myDorm: 'My dorm', room: 'room', mine: 'Mine',
@@ -1408,7 +1408,6 @@ function pageCatalog() {
   });
   const sorters = {
     new: (a, b) => b.created.localeCompare(a.created),
-    popular: (a, b) => b.uses - a.uses,
     name: (a, b) => a.title.localeCompare(b.title, 'ru'),
     free: (a, b) => (a.status === 'busy') - (b.status === 'busy')
   };
@@ -1448,7 +1447,6 @@ function pageCatalog() {
       <label class="f-sort"><span>${t('sort')}</span>
         <select class="ctl" id="fSort">
           <option value="new" ${F.sort === 'new' ? 'selected' : ''}>${t('sortNew')}</option>
-          <option value="popular" ${F.sort === 'popular' ? 'selected' : ''}>${t('sortPop')}</option>
           <option value="free" ${F.sort === 'free' ? 'selected' : ''}>${t('sortFree')}</option>
           <option value="name" ${F.sort === 'name' ? 'selected' : ''}>${t('sortName')}</option>
         </select></label>
